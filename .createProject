@@ -1,0 +1,10 @@
+#!/bin/bash
+
+clear
+
+echo "Enter name of new project:"
+read projectName
+mkdir $PROJECTS/$projectName
+clear
+echo "Project $projectName created!"
+$WD/.chooseProject

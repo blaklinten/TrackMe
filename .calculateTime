@@ -1,0 +1,8 @@
+#!/bin/bash
+
+let "DIFF = $2 - $1"
+let "SECONDS = DIFF % 60"
+let "MINUTES = (DIFF % 3600) / 60"
+let "HOURS = DIFF / 3600"
+
+echo "$HOURS:$MINUTES:$SECONDS"

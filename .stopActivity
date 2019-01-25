@@ -1,0 +1,20 @@
+#!/bin/bash
+
+clear
+
+if [ ! -f $WD/active ]; then
+    echo "No timer active, exiting..."
+    exit
+fi
+
+END=$(date +%s)
+ACTIVITY=$(head -n 1 $WD/active)
+PROJECT=$(head -n 2 $WD/active | tail -n 1)
+START=$(tail -n 1 $WD/active)
+
+echo "Started at $(date --date="@$START")" >> $PROJECTS/$PROJECT/$ACTIVITY
+echo "Ended at $(date --date="@$END")" >> $PROJECTS/$PROJECT/$ACTIVITY
+echo "Duration: $($WD/.calculateTime "$START" "$END")" >> $PROJECTS/$PROJECT/$ACTIVITY
+yes | rm $WD/active
+
+echo "Time entry added to $ACTIVITY!"
