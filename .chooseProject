@@ -1,0 +1,21 @@
+#!/bin/bash
+
+if [[ -f $WD/active ]]; then
+    echo "A timer is already running, exiting..."
+    exit
+fi
+
+clear
+cat $WD/.choices
+ls $PROJECTS
+read choice
+case $choice in
+    "q")
+        ;;
+    "n")
+        $WD/.createProject
+        ;;
+    *)
+        $WD/.startActivity $choice
+        ;;
+esac

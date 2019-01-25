@@ -1,0 +1,16 @@
+#!/bin/bash
+
+if [[ ! -f $WD/active ]]; then
+    echo "No active timer running!"
+    exit
+fi
+
+
+ACTIVITY=$(head -n 1 $WD/active)
+PROJECT=$(head -n 2 $WD/active | tail -n 1)
+START=$(tail -n 1 $WD/active)
+END=$(date +%s)
+
+echo "Timer running for $ACTIVITY on $PROJECT."
+echo "Started at $(date --date="@$START")"
+echo "Running for $($WD/.calculateTime $START $END)."
