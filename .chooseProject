@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [[ -f $WD/active ]]; then
+if [[ -f $HOME/TrackMe/active ]]; then
     echo "A timer is already running, exiting..."
     exit
 fi

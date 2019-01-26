@@ -5,8 +5,8 @@ echo "What are you doing?"
 read activity
 START=$(date +%s)
 
-echo "$activity" > $WD/active
-echo "$1" >> $WD/active
-echo "$START" >> $WD/active
+echo "$activity" > $HOME/TrackMe/active
+echo "$1" >> $HOME/TrackMe/active
+echo "$START" >> $HOME/TrackMe/active
 
 echo "$activity@$1 started @$(date --date="@$START")"

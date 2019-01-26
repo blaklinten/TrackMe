@@ -4,16 +4,6 @@
 # This is a script that helps me keep track of my time. #
 #########################################################
 
-
-# To fix quiet pushd & popd
-
-pushd () {
-    command pushd "$@" > /dev/null
-}
-popd () {
-    command popd "$@" > /dev/null
-}
-
 # Clear screen 
 
 clear
@@ -21,13 +11,13 @@ clear
 # Check if env is ok,
 # if not, fix it!
 
-if [ ! -d Projects ]; then
-    mkdir $PWD/Projects
+if [ ! -d $HOME/TrackMe/Projects ]; then
+    mkdir $HOME/TrackMe/Projects
     echo "Creating working env..."
 fi
 
 export WD=$PWD
-export PROJECTS=$WD/Projects
+export PROJECTS=$HOME/TrackMe/Projects
 
 # Real time loop.
 
