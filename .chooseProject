@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [[ -f $HOME/TrackMe/active ]]; then
+if [[ -f $ACTIVE ]]; then
     echo "A timer is already running, exiting..."
     exit
 fi

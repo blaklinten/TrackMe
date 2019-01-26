@@ -1,14 +1,14 @@
 #!/bin/bash
 
-if [[ ! -f $HOME/TrackMe/active ]]; then
+if [[ ! -f $ACTIVE ]]; then
     echo "No active timer running!"
     exit
 fi
 
 
-ACTIVITY=$(head -n 1 $WD/active)
-PROJECT=$(head -n 2 $WD/active | tail -n 1)
-START=$(tail -n 1 $WD/active)
+ACTIVITY=$(head -n 1 $ACTIVE)
+PROJECT=$(head -n 2 $ACTIVE | tail -n 1)
+START=$(tail -n 1 $ACTIVE)
 END=$(date +%s)
 
 echo "Timer running for $ACTIVITY on $PROJECT."
