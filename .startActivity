@@ -2,19 +2,16 @@
 
 clear
 
-for project in $(ls $PROJECTS); do
-    if [[ $project == $1 ]]; then
-        break
-    fi
-    echo "Project $1 does not exist, try again or create it (n)."
-    sleep 3s
-    $WD/.chooseProject
-    exit
-done
-
 echo "What are you doing?"
 ls $PROJECTS/$1
 read activity
+if [[ $activity == "" ]]; then
+    echo "You must enter a valid activity name."
+    sleep 2s
+    $WD/.startActivity $1
+    exit
+fi
+
 START=$(date +%s)
 
 echo "$activity" > $ACTIVE
