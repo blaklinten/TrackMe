@@ -1,7 +1,19 @@
 #!/bin/bash
 
 clear
+
+for project in $(ls $PROJECTS); do
+    if [[ $project == $1 ]]; then
+        break
+    fi
+    echo "Project $1 does not exist, try again or create it (n)."
+    sleep 3s
+    $WD/.chooseProject
+    exit
+done
+
 echo "What are you doing?"
+ls $PROJECTS/$1
 read activity
 START=$(date +%s)
 
