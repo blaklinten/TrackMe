@@ -12,12 +12,13 @@ clear
 # if not, fix it!
 
 if [ ! -d $HOME/TrackMe/Projects ]; then
-    mkdir $HOME/TrackMe/Projects
+    mkdir -p $HOME/TrackMe/Projects
     echo "Creating working env..."
 fi
 
 export WD=$PWD
 export PROJECTS=$HOME/TrackMe/Projects
+export ACTIVE=$HOME/TrackMe/active
 
 # Real time loop.
 

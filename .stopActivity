@@ -2,19 +2,19 @@
 
 clear
 
-if [ ! -f $HOME/TrackMe/active ]; then
+if [ ! -f $ACTIVE ]; then
     echo "No timer active, exiting..."
     exit
 fi
 
 END=$(date +%s)
-ACTIVITY=$(head -n 1 $WD/active)
-PROJECT=$(head -n 2 $WD/active | tail -n 1)
-START=$(tail -n 1 $WD/active)
+ACTIVITY=$(head -n 1 $ACTIVE)
+PROJECT=$(head -n 2 $ACTIVE | tail -n 1)
+START=$(tail -n 1 $ACTIVE)
 
 echo "Started at $(date --date="@$START")" >> $PROJECTS/$PROJECT/$ACTIVITY
 echo "Ended at $(date --date="@$END")" >> $PROJECTS/$PROJECT/$ACTIVITY
 echo "Duration: $($WD/.calculateTime "$START" "$END")" >> $PROJECTS/$PROJECT/$ACTIVITY
-yes | rm $WD/active
+yes | rm $ACTIVE
 
 echo "Time entry added to $ACTIVITY!"
