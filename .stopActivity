@@ -2,7 +2,7 @@
 
 clear
 
-if [ ! -f $WD/active ]; then
+if [ ! -f $HOME/TrackMe/active ]; then
     echo "No timer active, exiting..."
     exit
 fi
