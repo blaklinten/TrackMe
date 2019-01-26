@@ -10,6 +10,11 @@ cat $WD/.choices
 ls $PROJECTS
 read choice
 case $choice in
+    "")
+        echo "Please enter a valid project!"
+        sleep 1s
+        $WD/.chooseProject
+        ;;
     "q")
         ;;
     "n")
