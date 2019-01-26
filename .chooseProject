@@ -10,17 +10,22 @@ cat $WD/.choices
 ls $PROJECTS
 read choice
 case $choice in
-    "")
-        echo "Please enter a valid project!"
-        sleep 1s
-        $WD/.chooseProject
-        ;;
     "q")
+        exit
         ;;
     "n")
         $WD/.createProject
         ;;
     *)
+        for project in $(ls $PROJECTS); do
+            if [[ $project == $choice ]]; then
+                break
+            fi
+            echo "Project \"$choice\" does not exist, try again or create it (n)."
+            sleep 2s
+            $WD/.chooseProject
+            exit
+        done
         $WD/.startActivity $choice
         ;;
 esac

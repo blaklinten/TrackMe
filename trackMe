@@ -32,4 +32,7 @@ case $1 in
     "status")
         $WD/.timerStatus
         ;;
+    "config")
+        $WD/.configure
+        ;;
 esac
