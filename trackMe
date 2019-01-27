@@ -8,17 +8,19 @@
 
 clear
 
+export WD=$PWD
+export TRACKME=$HOME/TrackMe
+export PROJECTS=$TRACKME/Projects
+export ACTIVE=$TRACKME/active
+
 # Check if env is ok,
 # if not, fix it!
 
-if [ ! -d $HOME/TrackMe/Projects ]; then
-    mkdir -p $HOME/TrackMe/Projects
+if [ ! -d $PROJECTS ]; then
+    mkdir -p $PROJECTS
     echo "Creating working env..."
 fi
 
-export WD=$PWD
-export PROJECTS=$HOME/TrackMe/Projects
-export ACTIVE=$HOME/TrackMe/active
 
 # Real time loop.
 
