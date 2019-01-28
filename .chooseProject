@@ -19,13 +19,13 @@ case $choice in
     *)
         for project in $(ls $PROJECTS); do
             if [[ $project == $choice ]]; then
-                break
+                $WD/.startActivity $choice
+                exit
             fi
+        done
             echo "Project \"$choice\" does not exist, try again or create it (n)."
             sleep 2s
             $WD/.chooseProject
             exit
-        done
-        $WD/.startActivity $choice
         ;;
 esac

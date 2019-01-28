@@ -37,4 +37,7 @@ case $1 in
     "config")
         $WD/.configure
         ;;
+    *)
+        cat $WD/.man
+        ;;
 esac
