@@ -5,6 +5,11 @@
 #
 # Use git sync yes/no
 export GITSYNC=true
+###### TODO ######
+# Fix info if    #
+# git is not     #
+# available      #
+##################
 
 # Export enviroment variables
 export WD=$PWD
