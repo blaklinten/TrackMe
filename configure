@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# These are the configuration options
+#
+# Use git sync yes/no
+export GITSYNC=true
+
+# Export enviroment variables
+
+export WD=$PWD
+export TRACKME=$HOME/TrackMe
+export PROJECTS=$TRACKME/Projects
+export ACTIVE=$TRACKME/active
+
+# Check if project destination is ok
+# if not, fix it
+if [[ ! -d $TRACKME ]]; then
+    mkdir -p $PROJECTS
+    echo "Creating working env..."
+fi

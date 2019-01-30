@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Sync from Git if needed
+if [[ $GITSYNC == "true" ]]; then
+    $WD/.gitpull &
+fi
+
 clear
 
 echo "What are you doing?"

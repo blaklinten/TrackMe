@@ -17,4 +17,9 @@ echo "Ended at $(date --date="@$END")" >> $PROJECTS/$PROJECT/$ACTIVITY
 echo "Duration: $($WD/.calculateTime "$START" "$END")" >> $PROJECTS/$PROJECT/$ACTIVITY
 yes | rm $ACTIVE
 
+# Push to git, if wanted
+if [[ $GITSYNC == "true" ]]; then
+    $WD/.gitpush $ACTIVITY $PROJECT &
+fi
+
 echo "Time entry added to $ACTIVITY!"
