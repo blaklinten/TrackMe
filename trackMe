@@ -8,19 +8,10 @@
 
 clear
 
-export WD=$PWD
-export TRACKME=$HOME/TrackMe
-export PROJECTS=$TRACKME/Projects
-export ACTIVE=$TRACKME/active
-
 # Check if env is ok,
 # if not, fix it!
 
-if [ ! -d $PROJECTS ]; then
-    mkdir -p $PROJECTS
-    echo "Creating working env..."
-fi
-
+source $WD/configure
 
 # Real time loop.
 
@@ -33,9 +24,6 @@ case $1 in
         ;;
     "status")
         $WD/.timerStatus
-        ;;
-    "config")
-        $WD/.configure
         ;;
     *)
         cat $WD/.man

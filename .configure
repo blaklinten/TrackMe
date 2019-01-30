@@ -1,7 +1,0 @@
-#!/bin/bash
-
-echo "Please, enter your git repo URL: "
-read repo
-
-if [[ -d $TrackMe/.git ]]; then
-    git clone

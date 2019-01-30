@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# Pull from git
+pushd $TRACKME # > /dev/null
+git pull # > /dev/null
