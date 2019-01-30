@@ -1,10 +1,15 @@
 #!/bin/bash
 
+# Create a new project
+
+# Clear screen
 clear
 
 echo "Enter name of new project:"
 read projectName
+# Create directory for project ot live in
 mkdir $PROJECTS/$projectName
 clear
 echo "Project $projectName created!"
+# Let user choose project, now with new project in list
 $WD/.chooseProject

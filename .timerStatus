@@ -1,16 +1,25 @@
 #!/bin/bash
 
+# Show status of a running timer
+
+# Validate that the really is a timer running
+# and exit if not.
 if [[ ! -f $ACTIVE ]]; then
     echo "No active timer running!"
     exit
 fi
 
-
+# Fetch name of activity,
 ACTIVITY=$(head -n 1 $ACTIVE)
+# project, 
 PROJECT=$(head -n 2 $ACTIVE | tail -n 1)
+# start and
 START=$(tail -n 1 $ACTIVE)
+# end times of running timer from
+# temporary file.
 END=$(date +%s)
 
+# Print information for user to read.
 echo "Timer running for $ACTIVITY on $PROJECT."
 echo "Started at $(date --date="@$START")"
 echo "Running for $($WD/.calculateTime $START $END)."

@@ -5,16 +5,13 @@
 #########################################################
 
 # Clear screen 
-
 clear
 
 # Check if env is ok,
 # if not, fix it!
-
 source configure
 
 # Real time loop.
-
 case $1 in
     "start")
         $WD/.chooseProject
