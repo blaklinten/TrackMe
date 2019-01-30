@@ -11,7 +11,7 @@ clear
 # Check if env is ok,
 # if not, fix it!
 
-source $WD/configure
+source configure
 
 # Real time loop.
 
