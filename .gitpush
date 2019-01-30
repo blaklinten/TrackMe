@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Push to git, if wanted
+# Push to git quietly
 pushd $TRACKME &> /dev/null
 git add . &> /dev/null
 git commit -m "Time entry for $1, $2" &> /dev/null

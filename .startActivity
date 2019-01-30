@@ -1,15 +1,20 @@
 #!/bin/bash
 
-# Sync from Git if needed
+# Start an activity in a given project
+
+# Sync from Git if wanted
 if [[ $GITSYNC == "true" ]]; then
     $WD/.gitpull &
 fi
 
+# Clear screen
 clear
 
+# Ask for user activity
 echo "What are you doing?"
 ls $PROJECTS/$1
 read activity
+# Validate user input
 if [[ $activity == "" ]]; then
     echo "You must enter a valid activity name."
     sleep 2s
@@ -17,10 +22,14 @@ if [[ $activity == "" ]]; then
     exit
 fi
 
+# Record start time of tracking
 START=$(date +%s)
 
+# Write information of running timer to temp
+# file for use when stopping timer later.
 echo "$activity" > $ACTIVE
 echo "$1" >> $ACTIVE
 echo "$START" >> $ACTIVE
 
+# Inform user that timer is running.
 echo "$activity@$1 started @$(date --date="@$START")"

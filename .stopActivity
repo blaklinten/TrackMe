@@ -1,20 +1,31 @@
 #!/bin/bash
 
+# Stop a running timer
+
+# Clear screen
 clear
 
+# Check if there really is a running timer
+# and do inform is there is not.
 if [ ! -f $ACTIVE ]; then
     echo "No timer active, exiting..."
     exit
 fi
 
+# Record stop time of timer.
 END=$(date +%s)
+# Fetch name of activity,
 ACTIVITY=$(head -n 1 $ACTIVE)
+# project and
 PROJECT=$(head -n 2 $ACTIVE | tail -n 1)
+# start time for running timer.
 START=$(tail -n 1 $ACTIVE)
 
+# Write information to the corresponding project/activity file
 echo "Started at $(date --date="@$START")" >> $PROJECTS/$PROJECT/$ACTIVITY
 echo "Ended at $(date --date="@$END")" >> $PROJECTS/$PROJECT/$ACTIVITY
 echo "Duration: $($WD/.calculateTime "$START" "$END")" >> $PROJECTS/$PROJECT/$ACTIVITY
+# and remove temporary file.
 yes | rm $ACTIVE
 
 # Push to git, if wanted
@@ -22,4 +33,5 @@ if [[ $GITSYNC == "true" ]]; then
     $WD/.gitpush $ACTIVITY $PROJECT &
 fi
 
+# Inform user of success.
 echo "Time entry added to $ACTIVITY!"

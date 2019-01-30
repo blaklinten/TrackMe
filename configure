@@ -1,12 +1,12 @@
 #!/bin/bash
 
 # These are the configuration options
+# for the TrackMe script
 #
 # Use git sync yes/no
 export GITSYNC=true
 
 # Export enviroment variables
-
 export WD=$PWD
 export TRACKME=$HOME/TrackMe
 export PROJECTS=$TRACKME/Projects

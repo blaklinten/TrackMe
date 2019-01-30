@@ -1,8 +1,12 @@
 #!/bin/bash
 
+# Calculate the difference in seconds between parameter 1 & 2
+# when the format of parameters is seconds "since UNIX time began".
+
 let "DIFF = $2 - $1"
 let "SECONDS = DIFF % 60"
 let "MINUTES = (DIFF % 3600) / 60"
 let "HOURS = DIFF / 3600"
 
+# Return answer in format H:M:S
 echo "$HOURS:$MINUTES:$SECONDS"
