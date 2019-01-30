@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Push to git, if wanted
-pushd $TRACKME # > /dev/null
-git add . > /dev/null
-git commit -m "Time entry for $1, $2" > /dev/null
-git push > /dev/null
-popd > /dev/null
+pushd $TRACKME &> /dev/null
+git add . &> /dev/null
+git commit -m "Time entry for $1, $2" &> /dev/null
+git push &> /dev/null
+popd &> /dev/null
