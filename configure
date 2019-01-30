@@ -14,7 +14,7 @@ export ACTIVE=$TRACKME/active
 
 # Check if project destination is ok
 # if not, fix it
-if [[ ! -d $TRACKME ]]; then
+if [[ ! -d $PROJECTS ]]; then
     mkdir -p $PROJECTS
     echo "Creating working env..."
 fi
