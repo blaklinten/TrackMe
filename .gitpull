@@ -3,3 +3,5 @@
 # Pull from git quietly
 pushd $TRACKME &> /dev/null
 git pull &> /dev/null
+popd &> /dev/null
+popd &> /dev/null
