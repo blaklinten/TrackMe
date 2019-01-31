@@ -2,6 +2,8 @@
 
 # Start an activity in a given project
 
+# Set project
+PROJECT=$1
 # Sync from Git if wanted
 if [[ $GITSYNC == "true" ]]; then
     $WD/.gitpull &
@@ -12,13 +14,13 @@ clear
 
 # Ask for user activity
 echo "What are you doing?"
-ls $PROJECTS/$1
+ls $PROJECTS/$PROJECT
 read activity
 # Validate user input
 if [[ $activity == "" ]]; then
     echo "You must enter a valid activity name."
     sleep 2s
-    $WD/.startActivity $1
+    $WD/.startActivity $PROJECT
     exit
 fi
 
@@ -32,4 +34,4 @@ echo "$1" >> $ACTIVE
 echo "$START" >> $ACTIVE
 
 # Inform user that timer is running.
-echo "$activity@$1 started @$(date --date="@$START")"
+echo "$activity@$PROJECT started @$(date --date="@$START")"

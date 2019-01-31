@@ -1,0 +1,41 @@
+#!/bin/bash
+
+# Summarize time for a given project or activity
+
+# Clear screen
+#clear
+
+# Set project too work with
+PROJECT=$1
+
+# Instruct user what to do
+echo "Choose one activity or all (a) to sum:"
+# print existing activities in chosen project
+ls $PROJECTS/$PROJECT
+# Wait for user input
+read choice
+case $choice in 
+    "q")
+        exit
+        ;;
+    "a")
+        echo $($WD/.addProject $PROJECTS/$PROJECT)
+        exit
+        ;;
+    *)
+        # Check if given activity exist and if not
+        # ask again
+        for activity in $(ls $PROJECTS/$PROJECT); do
+            if [[ $choice == $activity ]]; then
+                # If activity exist then sum all
+                # entries
+                echo $($WD/.addEntries $PROJECTS/$PROJECT/$choice)
+                exit
+            fi
+        done
+        echo "Activity \"$choice\" does not exist, try again or exit (q)."
+        sleep 2s
+        $WD/.summarize $PROJECT
+        exit
+        ;;
+esac

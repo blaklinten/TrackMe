@@ -1,46 +1,36 @@
 #!/bin/bash
 
-# Handle what project the script should 
-# track.
+# Choose what project the script should 
+# handle.
 
-# Check if there is running timer and if so
-# inform and exist.
-if [[ -f $ACTIVE ]]; then
-    echo "A timer is already running, exiting..."
-    exit
-fi
+# Set script to run when done
+export SCRIPT=$1
 
-# Clear screen
-clear
-
-# Show different chioces and ask for 
-# user input.
-cat $WD/.choices
+# Print existing projects
 ls $PROJECTS
+# and wait for user input
 read choice
-
-# Continue based on user input
 case $choice in
     "q")
         exit
         ;;
     "n")
-        $WD/.createProject
+        $WD/.createProject 
         ;;
     *)
         # Check if given project exist and if not
         # ask for it to be created.
         for project in $(ls $PROJECTS); do
             if [[ $project == $choice ]]; then
-                # If project exist, start activity in this
+                # If project exist, start script in this
                 # project
-                $WD/.startActivity $choice
+                $SCRIPT $choice
                 exit
             fi
         done
             echo "Project \"$choice\" does not exist, try again or create it (n)."
             sleep 2s
-            $WD/.chooseProject
+            $WD/.chooseProject $SCRIPT
             exit
         ;;
 esac

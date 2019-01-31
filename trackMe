@@ -14,7 +14,23 @@ source configure
 # Real time loop.
 case $1 in
     "start")
-        $WD/.chooseProject
+        # Check if there is running timer and if so
+        # inform and exist.
+        if [[ -f $ACTIVE ]]; then
+            echo "A timer is already running, exiting..."
+            exit
+        fi
+
+        # Show different chioces 
+        cat $WD/.choices
+        # Choose project to start
+        $WD/.chooseProject $WD/.startActivity
+        ;;
+    "sum")
+        # Show different chioces 
+        cat $WD/.summingChoices
+        # Choose project to sum
+        $WD/.chooseProject $WD/.summarize
         ;;
     "stop")
         $WD/.stopActivity

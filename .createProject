@@ -12,4 +12,4 @@ mkdir $PROJECTS/$projectName
 clear
 echo "Project $projectName created!"
 # Let user choose project, now with new project in list
-$WD/.chooseProject
+$WD/.chooseProject $SCRIPT
