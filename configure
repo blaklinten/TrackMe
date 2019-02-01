@@ -4,7 +4,7 @@
 # for the TrackMe script
 #
 # Use git sync yes/no
-export GITSYNC=true
+export GITSYNC=false
 ###### TODO ######
 # Fix info if    #
 # git is not     #
@@ -12,7 +12,7 @@ export GITSYNC=true
 ##################
 
 # Export enviroment variables
-export PWD=/home/blaklinten/Git/TrackMe
+export PWD=/home/blaklinten/Git/TrackMe # This is where your program lives
 export WD=$PWD
 export TRACKME=$HOME/TrackMe
 export PROJECTS=$TRACKME/Projects

@@ -4,34 +4,31 @@
 
 # Set project
 PROJECT=$1
+
 # Sync from Git if wanted
 if [[ $GITSYNC == "true" ]]; then
     $WD/.gitpull & disown
 fi
 
-# Clear screen
-clear
-
 # Ask for user activity
-echo "What are you doing?"
-ls $PROJECTS/$PROJECT
-read activity
+activity=$(echo -e "What are you doing?\n$(ls $PROJECTS/$PROJECT)" | dmenu -i)
+
 # Validate user input
 if [[ $activity == "" ]]; then
-    echo "You must enter a valid activity name."
+    echo "You must enter a valid activity name." | dmenu
     sleep 2s
     $WD/.startActivity $PROJECT
-    exit
+    $WD/trackMe
 fi
 
 # Record start time of tracking
 START=$(date +%s)
 
 # Write information of running timer to temp
-# file for use when stopping timer later.
+# file for use when stopping timer later
 echo "$activity" > $ACTIVE
 echo "$1" >> $ACTIVE
 echo "$START" >> $ACTIVE
 
-# Inform user that timer is running.
-echo "$activity@$PROJECT started @$(date --date="@$START")"
+# Inform user that timer is running
+echo "$activity@$PROJECT started at $(date --date="@$START")" | dmenu

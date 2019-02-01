@@ -2,25 +2,21 @@
 
 # Summarize time for a given project or activity
 
-# Clear screen
-#clear
-
 # Set project too work with
 PROJECT=$1
 
-# Instruct user what to do
-echo "Choose one activity or all (a) to sum:"
+# Instruct user what to do 
 # print existing activities in chosen project
-ls $PROJECTS/$PROJECT
-# Wait for user input
-read choice
+# and wait for user input
+choice=$(echo -e "Choose one activity \nall\nor\nquit\n$(ls $PROJECTS/$PROJECT)" | dmenu -i)
+
 case $choice in 
-    "q")
+    "quit")
         exit
         ;;
-    "a")
-        echo $($WD/.addProject $PROJECTS/$PROJECT)
-        exit
+    "all")
+        echo $($WD/.addProject $PROJECTS/$PROJECT) | dmenu
+        $WD/trackMe
         ;;
     *)
         # Check if given activity exist and if not
@@ -29,13 +25,12 @@ case $choice in
             if [[ $choice == $activity ]]; then
                 # If activity exist then sum all
                 # entries
-                echo $($WD/.addEntries $PROJECTS/$PROJECT/$choice)
-                exit
+                echo $($WD/.addEntries $PROJECTS/$PROJECT/$choice) | dmenu
+                $WD/trackMe
             fi
         done
-        echo "Activity \"$choice\" does not exist, try again or exit (q)."
-        sleep 2s
+        echo "Activity \"$choice\" does not exist, try again or exit (q)." | dmenu
         $WD/.summarize $PROJECT
-        exit
+        $WD/trackMe
         ;;
 esac

@@ -1,4 +1,6 @@
-Welcome!
-Create new project (n),
-Quit (q)
-or choose from list of existing projects:
+What do you want to do? 
+start
+stop
+status
+summarize
+quit

@@ -2,14 +2,11 @@
 
 # Stop a running timer
 
-# Clear screen
-clear
-
 # Check if there really is a running timer
 # and do inform is there is not.
 if [ ! -f $ACTIVE ]; then
-    echo "No timer active, exiting..."
-    exit
+    echo "No timer active, start one?" | dmenu
+    $WD/trackMe
 fi
 
 # Record stop time of timer.
@@ -34,4 +31,4 @@ if [[ $GITSYNC == "true" ]]; then
 fi
 
 # Inform user of success.
-echo "Time entry added to $ACTIVITY!"
+echo "Time entry added to $ACTIVITY!" | dmenu
