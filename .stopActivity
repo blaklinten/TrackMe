@@ -30,7 +30,7 @@ yes | rm $ACTIVE
 
 # Push to git, if wanted
 if [[ $GITSYNC == "true" ]]; then
-    $WD/.gitpush $ACTIVITY $PROJECT &
+    $WD/.gitpush $ACTIVITY $PROJECT & disown
 fi
 
 # Inform user of success.
