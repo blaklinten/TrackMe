@@ -6,15 +6,15 @@
 # Set script to run when done
 export SCRIPT=$1
 
-# Print existing projects
-ls $PROJECTS
+# Inform user to choose one of the existing projects
 # and wait for user input
-read choice
+choice=$(echo -e "Choose an existing project, create a\nnew\nor\nquit\n$(ls $PROJECTS)" | dmenu -i)
+
 case $choice in
-    "q")
+    "quit")
         exit
         ;;
-    "n")
+    "new")
         $WD/.createProject 
         ;;
     *)
@@ -25,13 +25,12 @@ case $choice in
                 # If project exist, start script in this
                 # project
                 $SCRIPT $choice
-                exit
+                $WD/trackMe
             fi
         done
-            echo "Project \"$choice\" does not exist, try again or create it (n)."
-            sleep 2s
+            echo "Project \"$choice\" does not exist, try again or create it (n)." | dmenu
             $WD/.chooseProject $SCRIPT
-            exit
+            $WD/trackMe
         ;;
 esac
 

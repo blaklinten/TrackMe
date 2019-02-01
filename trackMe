@@ -4,31 +4,26 @@
 # This is a script that helps me keep track of my time. #
 #########################################################
 
-# Clear screen 
-clear
-
 # Check if env is ok,
 # if not, fix it!
 source configure
 
+# Show different chioces 
+CHOICE=$(cat $WD/.choices | dmenu -i)
 # Real time loop.
-case $1 in
+case $CHOICE in
     "start")
         # Check if there is running timer and if so
         # inform and exist.
         if [[ -f $ACTIVE ]]; then
-            echo "A timer is already running, exiting..."
+            echo "A timer is already running, exiting..." | dmenu 
             exit
         fi
 
-        # Show different chioces 
-        cat $WD/.choices
         # Choose project to start
         $WD/.chooseProject $WD/.startActivity
         ;;
-    "sum")
-        # Show different chioces 
-        cat $WD/.summingChoices
+    "summarize")
         # Choose project to sum
         $WD/.chooseProject $WD/.summarize
         ;;
@@ -38,7 +33,10 @@ case $1 in
     "status")
         $WD/.timerStatus
         ;;
+    "quit")
+        exit
+        ;;
     *)
-        cat $WD/.man
+        xmessage -c -file $WD/.man
         ;;
 esac

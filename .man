@@ -1,12 +1,10 @@
-TrackMe - A time tracking CLI program
+TrackMe - A time tracking program
 
 Usage:
     trackme [option]
 
 Options:
-    start  - start a timer
-    stop   - stop a running timer, if one exists.
-    status - check status of running timer, if any.
-    sum    - summarize time for a specified project and/or activity
-    config - configure TrackMe to sync to an existing git repository.
-
+    start        - start a timer
+    stop         - stop a running timer, if one exists.
+    status       - check status of running timer, if any.
+    summarize    - summarize time for a specified project and/or activity

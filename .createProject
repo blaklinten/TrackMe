@@ -2,14 +2,12 @@
 
 # Create a new project
 
-# Clear screen
-clear
+# Ask for name of new project
+projectName=$(echo "Enter name of new project:" | dmenu)
 
-echo "Enter name of new project:"
-read projectName
-# Create directory for project ot live in
+# Create directory for project to live in
 mkdir $PROJECTS/$projectName
-clear
 echo "Project $projectName created!"
+
 # Let user choose project, now with new project in list
 $WD/.chooseProject $SCRIPT
