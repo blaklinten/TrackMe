@@ -12,6 +12,7 @@ export GITSYNC=true
 ##################
 
 # Export enviroment variables
+export PWD=/home/blaklinten/Git/TrackMe
 export WD=$PWD
 export TRACKME=$HOME/TrackMe
 export PROJECTS=$TRACKME/Projects
