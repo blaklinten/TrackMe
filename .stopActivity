@@ -7,6 +7,7 @@
 if [ ! -f $ACTIVE ]; then
     echo "No timer active, start one?" | dmenu
     $WD/trackMe
+    exit
 fi
 
 # Record stop time of timer.
@@ -32,3 +33,4 @@ fi
 
 # Inform user of success.
 echo "Time entry added to $ACTIVITY!" | dmenu
+$WD/trackMe
