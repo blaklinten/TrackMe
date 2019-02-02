@@ -6,7 +6,6 @@
 # and exit if not.
 if [[ ! -f $ACTIVE ]]; then
     echo "No active timer running!" | dmenu
-    $WD/trackMe
     exit
 fi
 
@@ -22,4 +21,3 @@ END=$(date +%s)
 
 # Print information for user to read.
 echo -e "Timer running for $ACTIVITY on $PROJECT\nStarted at $(date --date="@$START")\nRunning for $($WD/.calculateTime $START $END)." | dmenu
-$WD/trackMe

@@ -33,4 +33,3 @@ fi
 
 # Inform user of success.
 echo "Time entry added to $ACTIVITY!" | dmenu
-$WD/trackMe

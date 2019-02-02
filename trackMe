@@ -8,35 +8,40 @@
 # if not, fix it!
 source configure
 
-# Show different chioces 
-CHOICE=$(cat $WD/.choices | dmenu -i)
 # Real time loop.
-case $CHOICE in
-    "start")
-        # Check if there is running timer and if so
-        # inform and exist.
-        if [[ -f $ACTIVE ]]; then
-            echo "A timer is already running, exiting..." | dmenu 
-            exit
-        fi
-
-        # Choose project to start
-        $WD/.chooseProject $WD/.startActivity
-        ;;
-    "summarize")
-        # Choose project to sum
-        $WD/.chooseProject $WD/.summarize
-        ;;
-    "stop")
-        $WD/.stopActivity
-        ;;
-    "status")
-        $WD/.timerStatus
-        ;;
-    "quit")
-        exit
-        ;;
-    *)
-        xmessage -c -file $WD/.man
-        ;;
-esac
+while true; do
+    # Show different chioces 
+    CHOICE=$(cat $WD/.choices | dmenu -i)
+    case $CHOICE in
+        "start")
+            # Check if there is running timer and if so
+            # inform and exist.
+            if [[ -f $ACTIVE ]]; then
+                echo "A timer is already running..." | dmenu 
+            else
+                # Choose project to start
+                $WD/.chooseProject $WD/.startActivity
+            fi
+            ;;
+        "summarize")
+            # Choose project to sum
+            $WD/.chooseProject $WD/.summarize
+            ;;
+        "stop")
+            # Stop running timer, if any
+            $WD/.stopActivity
+            ;;
+        "status")
+            # Return status for running timer, if any
+            $WD/.timerStatus
+            ;;
+        "help")
+            # Show a help message/ man page
+            xmessage -c -file $WD/.man
+            ;;
+        "quit")
+            # Exit the script
+            break
+            ;;
+    esac
+done

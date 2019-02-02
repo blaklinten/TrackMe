@@ -16,7 +16,6 @@ activity=$(echo -e "What are you doing?\n$(ls $PROJECTS/$PROJECT)" | dmenu -i)
 # Validate user input
 if [[ $activity == "" ]]; then
     echo "You must enter a valid activity name." | dmenu
-    sleep 2s
     $WD/.startActivity $PROJECT
     exit
 fi
@@ -32,4 +31,3 @@ echo "$START" >> $ACTIVE
 
 # Inform user that timer is running
 echo "$activity@$PROJECT started at $(date --date="@$START")" | dmenu
-$WD/trackMe

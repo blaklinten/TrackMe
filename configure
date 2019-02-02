@@ -5,6 +5,8 @@
 #
 # Use git sync yes/no
 export GITSYNC=false
+# This is where the script lives
+export PWD=/home/blaklinten/Git/TrackMe
 ###### TODO ######
 # Fix info if    #
 # git is not     #
@@ -12,7 +14,6 @@ export GITSYNC=false
 ##################
 
 # Export enviroment variables
-export PWD=/home/blaklinten/Git/TrackMe # This is where your program lives
 export WD=$PWD
 export TRACKME=$HOME/TrackMe
 export PROJECTS=$TRACKME/Projects
