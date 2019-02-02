@@ -26,4 +26,3 @@ let "MINUTES = $MINUTES % 60 + $SECONDS / 60"
 let "SECONDS = $SECONDS % 60"
 
 echo "Total time = $HOURS:$MINUTES:$SECONDS" | dmenu
-$WD/trackMe
