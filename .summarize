@@ -15,8 +15,8 @@ case $choice in
         exit
         ;;
     "all")
-        echo $($WD/.addProject $PROJECTS/$PROJECT) | dmenu
-        $WD/trackMe
+        $WD/.addProject $PROJECTS/$PROJECT
+        exit
         ;;
     *)
         # Check if given activity exist and if not
@@ -25,12 +25,11 @@ case $choice in
             if [[ $choice == $activity ]]; then
                 # If activity exist then sum all
                 # entries
-                echo $($WD/.addEntries $PROJECTS/$PROJECT/$choice) | dmenu
-                $WD/trackMe
+                $WD/.addEntries $PROJECTS/$PROJECT/$choice
+                exit
             fi
         done
         echo "Activity \"$choice\" does not exist, try again or exit (q)." | dmenu
         $WD/.summarize $PROJECT
-        $WD/trackMe
         ;;
 esac

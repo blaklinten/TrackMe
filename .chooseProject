@@ -25,12 +25,11 @@ case $choice in
                 # If project exist, start script in this
                 # project
                 $SCRIPT $choice
-                $WD/trackMe
+                exit
             fi
         done
             echo "Project \"$choice\" does not exist, try again or create it (n)." | dmenu
             $WD/.chooseProject $SCRIPT
-            $WD/trackMe
         ;;
 esac
 

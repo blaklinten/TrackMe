@@ -18,7 +18,7 @@ if [[ $activity == "" ]]; then
     echo "You must enter a valid activity name." | dmenu
     sleep 2s
     $WD/.startActivity $PROJECT
-    $WD/trackMe
+    exit
 fi
 
 # Record start time of tracking
@@ -32,3 +32,4 @@ echo "$START" >> $ACTIVE
 
 # Inform user that timer is running
 echo "$activity@$PROJECT started at $(date --date="@$START")" | dmenu
+$WD/trackMe
