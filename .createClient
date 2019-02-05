@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# Create a new client
+
+# Ask for name of new client
+client=$(echo "Enter name of new client:" | dmenu)
+
+# Create directory for client to live in
+mkdir $CLIENTS/$client
+
+# Let user choose client, now with new client in list
+$WD/.chooseClient $SCRIPT
+

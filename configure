@@ -16,12 +16,24 @@ export PWD=/home/blaklinten/Git/TrackMe
 # Export enviroment variables
 export WD=$PWD
 export TRACKME=$HOME/TrackMe
-export PROJECTS=$TRACKME/Projects
 export ACTIVE=$TRACKME/active
+# For clarity
+export CLIENTS=$TRACKME
+# Check if a timer is running and
+# set client accordingly
+if [[ ! -f $ACTIVE ]]; then
+    # No active timer so ask user for client
+    export CLIENT=$($WD/.chooseClient)
+else
+    # Otherwise, fetch client of running timer
+    export CLIENT=$(head -n 1 $ACTIVE)
+    echo "Client $CLIENT is running a timer." | dmenu
+fi
+export PROJECTS=$TRACKME/$CLIENT
 
 # Check if project destination is ok
 # if not, fix it
-if [[ ! -d $PROJECTS ]]; then
-    mkdir -p $PROJECTS
+if [[ ! -d $TRACKME ]]; then
+    mkdir -p $TRACKME
     echo "Creating working env..."
 fi

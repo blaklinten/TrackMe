@@ -25,7 +25,8 @@ START=$(date +%s)
 
 # Write information of running timer to temp
 # file for use when stopping timer later
-echo "$activity" > $ACTIVE
+echo "$CLIENT" > $ACTIVE
+echo "$activity" >> $ACTIVE
 echo "$1" >> $ACTIVE
 echo "$START" >> $ACTIVE
 

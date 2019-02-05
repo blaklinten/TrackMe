@@ -6,16 +6,15 @@
 # and do inform is there is not.
 if [ ! -f $ACTIVE ]; then
     echo "No timer active, start one?" | dmenu
-    $WD/trackMe
     exit
 fi
 
 # Record stop time of timer.
 END=$(date +%s)
 # Fetch name of activity,
-ACTIVITY=$(head -n 1 $ACTIVE)
+ACTIVITY=$(tail -n 3 $ACTIVE | head -n 1)
 # project and
-PROJECT=$(head -n 2 $ACTIVE | tail -n 1)
+PROJECT=$(tail -n 3 $ACTIVE | head -n 2 | tail -n 1)
 # start time for running timer.
 START=$(tail -n 1 $ACTIVE)
 
