@@ -10,9 +10,9 @@ if [[ ! -f $ACTIVE ]]; then
 fi
 
 # Fetch name of activity,
-ACTIVITY=$(head -n 1 $ACTIVE)
+ACTIVITY=$(tail -n 3 $ACTIVE | head -n 1 )
 # project, 
-PROJECT=$(head -n 2 $ACTIVE | tail -n 1)
+PROJECT=$(tail -n 3 $ACTIVE | head -n 2 | tail -n 1)
 # start and
 START=$(tail -n 1 $ACTIVE)
 # end times of running timer from

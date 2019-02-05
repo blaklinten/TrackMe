@@ -39,6 +39,10 @@ while true; do
             # Show a help message/ man page
             xmessage -c -file $WD/.man
             ;;
+        "switch")
+            # switch client for session
+            source configure
+            ;;
         "quit")
             # Exit the script
             break

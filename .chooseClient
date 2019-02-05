@@ -1,0 +1,35 @@
+#!/bin/bash
+
+# Choose what client the script should 
+# handle.
+
+# Set script to run when done
+export SCRIPT=$1
+
+# Inform user to choose one of the existing client
+# and wait for user input
+choice=$(echo -e "Choose an existing client, create a\nnew\nor\nquit\n$(ls $CLIENTS)" | dmenu -i)
+
+case $choice in
+    "quit")
+        exit
+        ;;
+    "new")
+        $WD/.createClient 
+        ;;
+    *)
+        # Check if given client exist and if not
+        # ask for it to be created.
+        for client in $(ls $CLIENTS); do
+            if [[ $client == $choice ]]; then
+                # If client exist, start script in this
+                # client
+                echo $client
+                exit
+            fi
+        done
+            echo "Client \"$choice\" does not exist, try again or create it (n)." | dmenu
+            $WD/.chooseClient $SCRIPT
+        ;;
+esac
+
