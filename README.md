@@ -1,2 +1,2 @@
 # TrackMe
-A CLI time tracker
+A time tracker
