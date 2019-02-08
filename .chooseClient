@@ -12,7 +12,9 @@ choice=$(echo -e "Choose an existing client, create a\nnew\nor\nquit\n$(ls $CLIE
 
 case $choice in
     "quit")
-        echo "You have to create a client!" | dmenu
+        echo "You have to create a client, exiting..." | dmenu
+        pkill trackMe
+        exit
         ;;
     "new")
         $WD/.createClient 
