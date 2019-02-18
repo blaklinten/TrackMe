@@ -22,7 +22,7 @@ case $choice in
         # Check if given activity exist and if not
         # ask again
         for activity in $(ls $PROJECTS/$PROJECT); do
-            if [[ $choice == $activity ]]; then
+            if [[ "$choice" == "$activity" ]]; then
                 # If activity exist then sum all
                 # entries
                 $WD/.addEntries $PROJECTS/$PROJECT/$choice
