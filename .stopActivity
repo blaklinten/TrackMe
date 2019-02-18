@@ -19,9 +19,9 @@ PROJECT=$(tail -n 3 $ACTIVE | head -n 2 | tail -n 1)
 START=$(tail -n 1 $ACTIVE)
 
 # Write information to the corresponding project/activity file
-echo "Started at $(date --date="@$START")" >> $PROJECTS/$PROJECT/$ACTIVITY
-echo "Ended at $(date --date="@$END")" >> $PROJECTS/$PROJECT/$ACTIVITY
-echo "Duration: $($WD/.calculateTime "$START" "$END")" >> $PROJECTS/$PROJECT/$ACTIVITY
+echo "Started at $(date --date="@$START")" >> "$PROJECTS/$PROJECT/$ACTIVITY"
+echo "Ended at $(date --date="@$END")" >> "$PROJECTS/$PROJECT/$ACTIVITY"
+echo "Duration: $($WD/.calculateTime "$START" "$END")" >> "$PROJECTS/$PROJECT/$ACTIVITY"
 # and remove temporary file.
 yes | rm $ACTIVE
 
