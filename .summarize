@@ -21,11 +21,13 @@ case $choice in
     *)
         # Check if given activity exist and if not
         # ask again
-        for activity in $(ls $PROJECTS/$PROJECT); do
+        pushd $PROJECTS/$PROJECT > /dev/zero
+        for activity in *; do
             if [[ "$choice" == "$activity" ]]; then
                 # If activity exist then sum all
                 # entries
                 $WD/.addEntries $PROJECTS/$PROJECT/$choice
+                popd > /dev/zero
                 exit
             fi
         done

@@ -3,7 +3,7 @@
 # Summarizing entries for a given activity
 
 # Set current activity
-ACTIVITY=$1
+ACTIVITY=$@
 
 # Initial values of hours,
 # minutes and seconds
@@ -11,7 +11,7 @@ HOURS=0
 MINUTES=0
 SECONDS=0
 
-for line in $(sed -n '0~3p' $ACTIVITY); do
+for line in $(sed -n '0~3p' "$ACTIVITY"); do
     if [[ ! $line == "Duration:" ]]; then
         let "HOURS = $HOURS + $(echo $line | sed -n -e 's/^\(.*\):\(.*\):\(.*\)/\1/p')"
         let "MINUTES = $MINUTES + $(echo $line | sed -n -e 's/^\(.*\):\(.*\):\(.*\)/\2/p')"
