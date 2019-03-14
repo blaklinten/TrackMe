@@ -6,7 +6,7 @@
 client=$(echo "Enter name of new client:" | dmenu)
 
 # Create directory for client to live in
-mkdir $CLIENTS/$client
+mkdir "$CLIENTS/$client"
 
 # Let user choose client, now with new client in list
 $WD/.chooseClient $SCRIPT

@@ -4,7 +4,8 @@
 # for the TrackMe script
 #
 # Use git sync yes/no
-export GITSYNC=false
+export GITSYNC=no
+#
 # This is where the script lives
 export PWD=/home/blaklinten/Git/TrackMe
 ###### TODO ######
@@ -17,6 +18,7 @@ export PWD=/home/blaklinten/Git/TrackMe
 export WD=$PWD
 export TRACKME=$HOME/TrackMe
 export ACTIVE=$TRACKME/active
+
 # For clarity
 export CLIENTS=$TRACKME
 # Check if a timer is running and

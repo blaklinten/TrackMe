@@ -22,11 +22,13 @@ case $choice in
     *)
         # Check if given client exist and if not
         # ask for it to be created.
-        for client in $(ls $CLIENTS); do
+        pushd $CLIENTS > /dev/zero
+        for client in *; do
             if [[ $client == $choice ]]; then
                 # If client exist, start script in this
                 # client
                 echo $client
+                popd > /dev/zero
                 exit
             fi
         done

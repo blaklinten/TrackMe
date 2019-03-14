@@ -20,11 +20,13 @@ case $choice in
     *)
         # Check if given project exist and if not
         # ask for it to be created.
-        for project in $(ls $PROJECTS); do
+        pushd $PROJECTS > /dev/zero
+        for project in *; do
             if [[ $project == $choice ]]; then
                 # If project exist, start script in this
                 # project
                 $SCRIPT $choice
+                popd > /dev/zero
                 exit
             fi
         done

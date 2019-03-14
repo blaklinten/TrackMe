@@ -6,7 +6,7 @@
 projectName=$(echo "Enter name of new project:" | dmenu)
 
 # Create directory for project to live in
-mkdir $PROJECTS/$projectName
+mkdir "$PROJECTS/$projectName"
 
 # Let user choose project, now with new project in list
 $WD/.chooseProject $SCRIPT
