@@ -6,7 +6,7 @@
 PROJECT=$1
 
 # Sync from Git if wanted
-if [[ $GITSYNC == "true" ]]; then
+if [[ $GITSYNC == "yes" ]]; then
     $WD/.gitpull & disown
 fi
 

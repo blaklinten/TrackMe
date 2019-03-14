@@ -26,7 +26,7 @@ echo "Duration: $($WD/.calculateTime "$START" "$END")" >> "$PROJECTS/$PROJECT/$A
 yes | rm $ACTIVE
 
 # Push to git, if wanted
-if [[ $GITSYNC == "true" ]]; then
+if [[ $GITSYNC == "yes" ]]; then
     $WD/.gitpush $ACTIVITY $PROJECT & disown
 fi
 
