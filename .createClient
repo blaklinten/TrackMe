@@ -3,7 +3,7 @@
 # Create a new client
 
 # Ask for name of new client
-client=$(echo "Enter name of new client:" | dmenu)
+client=$($WD/.parseSpaces $(echo "Enter name of new client:" | dmenu))
 
 # Create directory for client to live in
 mkdir "$CLIENTS/$client"
