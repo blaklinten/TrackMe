@@ -29,9 +29,9 @@ if [[ ! -f $ACTIVE ]]; then
 else
     # Otherwise, fetch client of running timer
     export CLIENT=$(head -n 1 $ACTIVE)
-    echo "Client $CLIENT is running a timer." | dmenu
+    echo "Client $($WD/.parseUnderscores $CLIENT) is running a timer." | dmenu
 fi
-export PROJECTS=$TRACKME/$($WD/.parseSpaces $CLIENT)
+export PROJECTS=$TRACKME/$CLIENT
 #
 # Check if project destination is ok
 # if not, fix it

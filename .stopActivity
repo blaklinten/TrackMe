@@ -31,4 +31,4 @@ if [[ $GITSYNC == "yes" ]]; then
 fi
 
 # Inform user of success.
-echo "Time entry added to $ACTIVITY!" | dmenu
+echo "Time entry added to $($WD/.parseUnderscores $ACTIVITY)!" | dmenu

@@ -8,7 +8,7 @@ export SCRIPT=$1
 
 # Inform user to choose one of the existing client
 # and wait for user input
-choice=$(echo -e "Choose an existing client, create a\nnew\nor\nquit\n$(ls $CLIENTS)" | dmenu -i)
+choice=$($WD/.parseSpaces $(echo -e "Choose an existing client, create a\nnew\nor\nquit\n$(for client in $(ls $CLIENTS); do $WD/.parseUnderscores $client; done)" | dmenu -i))
 
 case $choice in
     "quit")

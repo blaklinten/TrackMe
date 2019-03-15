@@ -3,7 +3,7 @@
 # Create a new project
 
 # Ask for name of new project
-projectName=$(echo "Enter name of new project:" | dmenu)
+projectName=$($WD/.parseSpaces $(echo "Enter name of new project:" | dmenu))
 
 # Create directory for project to live in
 mkdir "$PROJECTS/$projectName"

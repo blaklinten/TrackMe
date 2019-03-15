@@ -11,7 +11,7 @@ if [[ $GITSYNC == "yes" ]]; then
 fi
 
 # Ask for user activity
-activity=$(echo -e "What are you doing?\n$(ls $PROJECTS/$PROJECT)" | dmenu -i)
+activity=$($WD/.parseSpaces $(echo -e "What are you doing?\n$(for project in $(ls $PROJECTS/$PROJECT); do $WD/.parseUnderscores $project; done)" | dmenu -i))
 
 # Validate user input
 if [[ $activity == "" ]]; then
@@ -31,4 +31,4 @@ echo "$1" >> $ACTIVE
 echo "$START" >> $ACTIVE
 
 # Inform user that timer is running
-echo "$activity@$PROJECT started at $(date --date="@$START")" | dmenu
+echo "$($WD/.parseUnderscores $activity)@$($WD/.parseUnderscores $PROJECT) started at $(date --date="@$START")" | dmenu
