@@ -31,8 +31,8 @@ else
     export CLIENT=$(head -n 1 $ACTIVE)
     echo "Client $CLIENT is running a timer." | dmenu
 fi
-export PROJECTS=$TRACKME/$CLIENT
-
+export PROJECTS=$TRACKME/$($WD/.parseSpaces $CLIENT)
+#
 # Check if project destination is ok
 # if not, fix it
 if [[ ! -d $TRACKME ]]; then

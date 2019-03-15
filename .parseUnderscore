@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# Parse input string and replace '\_' with '\ '
+
+echo "$(echo $1 | sed s/\_/\ /g)"
+
