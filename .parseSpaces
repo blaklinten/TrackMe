@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# Replaces '\ ' with '\_' for input string
+
+echo "$(echo $@ | sed s/\ /\_/g)"
+
