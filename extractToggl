@@ -1,0 +1,71 @@
+#!/bin/bash
+# Setting delimiter for 'cat'
+IFS=$'\n'
+
+# Go through all lines and filter out the info (groups) we want
+# and save in files for later access
+for line in $(cat /home/blaklinten/TrackMe/.raw_data/toggl); do
+    echo $line | sed 's/,/\n/g' | sed -n 3p | sed 's/\ /\_/g' | sed 's/\//\&/g' >> group3
+    echo $line | sed 's/,/\n/g' | sed -n 4p | sed 's/\ /\_/g' | sed 's/\//\&/g' >> group4
+    echo $line | sed 's/,/\n/g' | sed -n 6p | sed 's/\ /\_/g' | sed 's/\//\&/g' >> group6
+    echo $line | sed 's/,/\n/g' | sed -n 8p | sed 's/\-//g' >> group8
+    echo $line | sed 's/,/\n/g' | sed -n 9p >> group9
+    echo $line | sed 's/,/\n/g' | sed -n 10p | sed 's/\-//g' >> group10
+    echo $line | sed 's/,/\n/g' | sed -n 11p >> group11
+    echo $line | sed 's/,/\n/g' | sed -n 12p | sed 's/\:0/\:/g' >> group12
+done
+
+# Create a counter to keep the current line in files of interest
+LINENUMBER=1
+# for each client
+for client in $(cat group3); do
+    if [[ $LINENUMBER == 1 ]]; then 
+        # The first line we skip
+        let "LINENUMBER = $LINENUMBER + 1"
+        continue
+    fi
+    # fetch project of this entry (line)
+    project=$(cat group4 | sed -n "${LINENUMBER}p")
+    # Check if the corresponding directory already exists
+    if [[ ! -d $client ]]; then 
+        mkdir "$client"
+    fi
+    if [[ ! -d $client/$project ]]; then
+        mkdir $client/$project
+    fi
+
+    # Pick the current line (entry) from each file
+    DESCRIPTION=$(cat group6 | sed -n "${LINENUMBER}p")
+    START_DATE=$(cat group8 | sed -n "${LINENUMBER}p")
+    START_TIME=$(cat group9 | sed -n "${LINENUMBER}p")
+    END_DATE=$(cat group10 | sed -n "${LINENUMBER}p")
+    END_TIME=$(cat group11 | sed -n "${LINENUMBER}p")
+    DURATION=$(cat group12 | sed -n "${LINENUMBER}p")
+
+    # Format the data to fit the standard
+    START_DATE_1=$(date --date=$START_DATE | head -c 11)
+    START_DATE_3=$(date --date=$START_DATE | sed 's/CEST/CET/' | tail -c 10)
+    END_DATE_1=$(date --date=$END_DATE | head -c 11)
+    END_DATE_3=$(date --date=$END_DATE | sed 's/CEST/CET/' | tail -c 10)
+    
+    # Write the result to corresponding files in directory tree
+    echo "Started at $START_DATE_1$START_TIME$START_DATE_3" >> $client/$project/$DESCRIPTION
+
+    echo "Ended at $END_DATE_1$END_TIME$END_DATE_3" >> $client/$project/$DESCRIPTION
+
+    echo "Duration: $DURATION" >> $client/$project/$DESCRIPTION
+
+    # Increase counter to fetch next line (entry)
+    let "LINENUMBER = $LINENUMBER + 1"
+done
+
+# Remove temp files
+echo Cleaning up...
+rm -rf group*
+echo Done.
+
+# This is how information is stored in .csv-files:
+#
+#User,Email,Client,Project,Task,Description,Billable,Start date,Start time,End date,End time,Duration,Tags,Amount ()
+#
+#Lucasnilsson92,lucasnilsson92@gmail.com,Datateknik 300hp,SSY080,,Föreläsning,No,2018-09-04,13:15:07,2018-09-04,16:57:17,03:42:10,,
