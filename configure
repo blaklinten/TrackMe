@@ -4,7 +4,7 @@
 # for the TrackMe script
 #
 # Use git sync yes/no
-export GITSYNC=no
+export GITSYNC=yes
 #
 # This is where the script lives
 export PWD=/home/blaklinten/Git/TrackMe
