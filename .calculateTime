@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Calculate the difference in seconds between parameter 1 & 2
-# when the format of parameters is seconds "since UNIX time began".
+# when the format of parameters is UNIX time.
 
 let "DIFF = $2 - $1"
 let "SECONDS = DIFF % 60"
