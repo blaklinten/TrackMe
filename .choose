@@ -1,0 +1,65 @@
+#!/bin/bash
+
+chooseClient()
+{
+	export SCRIPT=$1
+
+	AVAILABLE_CLIENTS="$(for CLIENT in $(ls $CLIENTS); do parseUnderscores $CLIENT; done)"
+	echo $AVAILABLE_CLIENTS
+	ANS="$(dmenu -i -p "Choose an existing client, create a (n)ew or (q)uit: $AVAILABLE_CLIENTS")"
+	CHOICE=$(parseSpaces "$ANS")
+
+	case $CHOICE in
+    	"quit")
+        	echo "Exiting..." | dmenu
+        	pkill trackMe
+        	exit
+       ;;
+    	"new")
+        	createClient 
+        	exit
+       ;;
+    	*)
+        	pushd "$CLIENTS" > /dev/zero
+        	for CLIENT in *; do
+            	if [[ "$CLIENT" == "$CHOICE" ]]; then
+                	echo "$CLIENT"
+                	popd > /dev/zero
+                	exit
+            	fi
+        	done
+            	echo "Client \"$CHOICE\" does not exist, try again or create it (n)." | dmenu
+            	chooseClient $SCRIPT
+       ;;
+	esac
+}
+
+chooseProject()
+{
+	export SCRIPT=$1
+
+	CHOICE=$(parseSpaces $(echo -e "Choose an existing project, create a\nnew\nor\nquit\n$(for PROJECT in $(ls $PROJECTS); do parseUnderscores $PROJECT; done)" | dmenu -i))
+
+	case $CHOICE in
+    	"quit")
+        	exit
+        	;;
+    	"new")
+        	createProject 
+        	exit
+        	;;
+    	*)
+        	pushd "$PROJECTS" > /dev/zero
+        	for PROJECT in *; do
+            	if [[ "$PROJECT" == "$CHOICE" ]]; then
+                	"$SCRIPT" "$CHOICE"
+                	popd > /dev/zero
+                	exit
+            	fi
+        	done
+        	echo "Project \"$(parseUnderscores "$CHOICE")\" does not exist, try again or create it (n)." | dmenu
+            	chooseProject "$SCRIPT"
+            	exit
+        	;;
+	esac
+}

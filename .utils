@@ -1,0 +1,26 @@
+#!/bin/bash
+
+diff()
+{
+	let "DIFF = $2 - $1"
+	let "SECONDS = DIFF % 60"
+	let "MINUTES = (DIFF % 3600) / 60"
+	let "HOURS = DIFF / 3600"
+
+	echo "$HOURS:$MINUTES:$SECONDS"
+}
+
+showStatus()
+{
+if [[ ! -f "$ACTIVE" ]]; then
+    echo "No active timer running!" | dmenu
+    exit
+fi
+
+ACTIVITY=$(tail -n 3 "$ACTIVE" | head -n 1 )
+PROJECT=$(tail -n 3 "$ACTIVE" | head -n 2 | tail -n 1)
+START=$(tail -n 1 "$ACTIVE")
+END=$(date +%s)
+
+echo -e "Timer running for $ACTIVITY on $PROJECT\nStarted at $(date --date="@$START")\nRunning for $(diff "$START" "$END")." | dmenu
+}
