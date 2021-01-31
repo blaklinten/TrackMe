@@ -57,7 +57,6 @@ summarize()
     	;;
     	"a")
         	sumProject "$PROJECTS/$PROJECT"
-        	exit
     	;;
     	*)
         	pushd "$PROJECTS/$PROJECT" > /dev/null
@@ -65,7 +64,7 @@ summarize()
             	if [[ "$CHOICE" == "$ACTIVITY" ]]; then
                 	sumActivity "$PROJECTS/$PROJECT/$CHOICE"
                 	popd > /dev/null
-                	exit
+                	return
             	fi
         	done
         	showAndRead "Activity \"$CHOICE\" does not exist, try again or exit (q)."

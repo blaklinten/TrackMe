@@ -31,7 +31,7 @@ stopActivity()
 {
 	if [ ! -f "$ACTIVE" ]; then
     	showAndRead "No timer active, start one?"
-    	exit
+    	return
 	fi
 
 	END=$(date +%s)
