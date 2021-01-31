@@ -33,11 +33,11 @@ for client in $(cat group3); do
     # fetch project of this entry (line)
     project=$(cat group4 | sed -n "${LINENUMBER}p")
     # Check if the corresponding directory already exists
-    if [[ ! -d $client ]]; then 
-        mkdir "$client"
+    if [[ ! -d "$TARGET_DIR/$client" ]]; then 
+        mkdir "$TARGET_DIR/$client"
     fi
-    if [[ ! -d $client/$project ]]; then
-        mkdir $client/$project
+    if [[ ! -d "$TARGET_DIR/$client/$project" ]]; then
+        mkdir "$TARGET_DIR/$client/$project"
     fi
 
     # Pick the current line (entry) from each file
