@@ -4,48 +4,51 @@
 # This is a script that helps me keep track of my time. #
 #########################################################
 
-# Check if env is ok,
-# if not, fix it!
 source configure
+source $WD/.choose
+source $WD/.create
+source $WD/.gitFunctions
+source $WD/.parse
+source $WD/.startStop
+source $WD/.summarize
+source $WD/.utils
 
-# Real time loop.
+if [[ ! -f "$ACTIVE" ]]; then
+    export CLIENT=$(chooseClient)
+else
+    export CLIENT=$(head -n 1 "$ACTIVE")
+    dmenu -p "Client $(parseUnderscores "$CLIENT") is running a timer."
+fi
+export PROJECTS="$CLIENTS/$CLIENT"
+
 while true; do
-    # Show different chioces 
-    CHOICE=$(cat $WD/.choices | dmenu -i)
-    case $CHOICE in
+    CHOICE=$(cat $WD/.choices | dmenu -i -p "What do you want to do?")
+    case "$CHOICE" in
         "start")
-            # Check if there is running timer and if so
-            # inform and exist.
-            if [[ -f $ACTIVE ]]; then
-                echo "A timer is already running..." | dmenu 
+            if [[ -f "$ACTIVE" ]]; then
+                dmenu -p "A timer is already running..."
             else
-                # Choose project to start
-                $WD/.chooseProject $WD/.startActivity
+                chooseProject "startActivity"
             fi
             ;;
         "summarize")
-            # Choose project to sum
-            $WD/.chooseProject $WD/.summarize
+            chooseProject "summarize"
             ;;
         "stop")
-            # Stop running timer, if any
-            $WD/.stopActivity
+            stopActivity
             ;;
         "status")
-            # Return status for running timer, if any
-            $WD/.timerStatus
+            showStatus
             ;;
         "help")
-            # Show a help message/ man page
             xmessage -c -file $WD/.man
             ;;
         "switch")
-            # switch client for session
-            source configure
+            trackMe
+            exit
             ;;
         "quit")
-            # Exit the script
-            break
+            exit
             ;;
     esac
 done

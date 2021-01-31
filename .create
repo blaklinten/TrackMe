@@ -1,0 +1,19 @@
+#!/bin/bash
+
+createClient()
+{
+	CLIENT=$(parseSpaces $(echo "Enter name of new client:" | dmenu))
+
+	mkdir "$CLIENTS/$CLIENT"
+
+	chooseClient "$SCRIPT"
+}
+
+createProject()
+{
+	projectName=$(parseSpaces $(echo "Enter name of new project:" | dmenu))
+
+	mkdir "$PROJECTS/$projectName"
+
+	chooseProject "$SCRIPT"
+}

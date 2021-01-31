@@ -1,0 +1,52 @@
+#!/bin/bash
+
+
+startActivity()
+{
+	PROJECT="$1"
+
+	if [[ "$GITSYNC" == "yes" ]]; then
+    	gitpull & disown
+	fi
+
+	ACTIVITY=$(parseSpaces $(echo -e "What are you doing?\n$(for ACT in $(ls $PROJECTS/$PROJECT); do parseUnderscores $ACT; done)" | dmenu -i))
+
+	if [[ "$ACTIVITY" == "" ]]; then
+    	echo "You must enter a valid activity name." | dmenu
+    	startActivity "$PROJECT"
+    	exit
+	fi
+
+	START=$(date +%s)
+
+	echo "$CLIENT" >> "$ACTIVE"
+	echo "$ACTIVITY" >> "$ACTIVE"
+	echo "$PROJECT" >> "$ACTIVE"
+	echo "$START" >> "$ACTIVE"
+
+	echo "$(parseUnderscores $ACTIVITY)@$(parseUnderscores $PROJECT) started at $(date --date="@$START")" | dmenu
+}
+
+stopActivity()
+{
+	if [ ! -f "$ACTIVE" ]; then
+    	echo "No timer active, start one?" | dmenu
+    	exit
+	fi
+
+	END=$(date +%s)
+	ACTIVITY=$(tail -n 3 "$ACTIVE" | head -n 1)
+	PROJECT=$(tail -n 3 "$ACTIVE" | head -n 2 | tail -n 1)
+	START=$(tail -n 1 "$ACTIVE")
+
+	echo "Started at $(date --date="@$START")" >> "$PROJECTS/$PROJECT/$ACTIVITY"
+	echo "Ended at $(date --date="@$END")" >> "$PROJECTS/$PROJECT/$ACTIVITY"
+	echo "Duration: $(diff "$START" "$END")" >> "$PROJECTS/$PROJECT/$ACTIVITY"
+	rm "$ACTIVE"
+
+	if [[ "$GITSYNC" == "yes" ]]; then
+    	gitpush "$ACTIVITY" "$PROJECT" & disown
+	fi
+
+	echo "Time entry added to $(parseUnderscores "$ACTIVITY")!" | dmenu
+}

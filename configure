@@ -14,26 +14,12 @@ export GITSYNC=no
 
 # Export enviroment variables
 export WD=$HOME/Git/TrackMe
-export TRACKME=$HOME/.trackme
-export ACTIVE=$TRACKME/active
-
-# For clarity
-export CLIENTS=$TRACKME
-# Check if a timer is running and
-# set client accordingly
-if [[ ! -f $ACTIVE ]]; then
-    # No active timer so ask user for client
-    export CLIENT=$($WD/.chooseClient)
-else
-    # Otherwise, fetch client of running timer
-    export CLIENT=$(head -n 1 $ACTIVE)
-    echo "Client $($WD/.parseUnderscores $CLIENT) is running a timer." | dmenu
-fi
-export PROJECTS=$TRACKME/$CLIENT
+export CLIENTS=$HOME/.trackme
+export ACTIVE=$CLIENTS/active
 #
 # Check if project destination is ok
 # if not, fix it
-if [[ ! -d $TRACKME ]]; then
-    mkdir -p $TRACKME
+if [[ ! -d "$CLIENTS" ]]; then
+    mkdir -p "$CLIENTS"
     echo "Creating working env..."
 fi
