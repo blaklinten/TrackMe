@@ -45,9 +45,7 @@ show()
 {
 	INFO="$1"
 	CHOICES="$2"
-	clear
-	printf "%s\n%s\n" "$INFO" "$CHOICES"
-	read ANS
+	echo "$CHOICES" | sed -e 's/ /\n/g' | dmenu -i -p "$INFO"
 }
 
 diff()
@@ -88,7 +86,7 @@ echo "$(echo $@ | sed s/\_/\ /g)"
 createClient()
 {
 	SCRIPT="$1"
-	show "Enter name of new client:"
+	ANS="$(show "Enter name of new client:")"
 	CLIENT=$(parseSpaces "$ANS")
 
 	mkdir "$CLIENTS/$CLIENT"
@@ -99,7 +97,7 @@ createClient()
 createProject()
 {
 	SCRIPT="$1"
-	show "Enter name of new project:"
+	ANS="$(show "Enter name of new project:")"
 	projectName=$(parseSpaces "$ANS")
 
 	mkdir "$PROJECTS/$projectName"
@@ -115,7 +113,7 @@ startActivity()
     	gitpull & disown
 	fi
 
-	show "What are you doing?" "$(for ACT in $(ls $PROJECTS/$PROJECT); do parseUnderscores $ACT; done)"
+	ANS="$(show "What are you doing?" "$(for ACT in $(ls $PROJECTS/$PROJECT); do parseUnderscores $ACT; done)")"
 	ACTIVITY=$(parseSpaces "$ANS")
 
 	if [[ "$ACTIVITY" == "" ]]; then
@@ -163,7 +161,7 @@ chooseClient()
 	SCRIPT=$1
 
 	AVAILABLE_CLIENTS="$(for CLIENT in $(ls $CLIENTS); do parseUnderscores $CLIENT; done)"
-	show "Choose an existing client, create a (n)ew or (q)uit:" "$AVAILABLE_CLIENTS"
+	ANS="$(show "Choose an existing client, create a (n)ew or (q)uit:" "$AVAILABLE_CLIENTS")"
 	CHOICE="$(parseSpaces "$ANS")"
 
 	case "$CHOICE" in
@@ -193,7 +191,7 @@ chooseClient()
 chooseProject()
 {
 	SCRIPT="$1"
-	show "Choose an existing project, create a (n)ew or (q)uit" "$(for PROJECT in $(ls $PROJECTS); do parseUnderscores $PROJECT; done)"
+	ANS="$(show "Choose an existing project, create a (n)ew or (q)uit" "$(for PROJECT in $(ls $PROJECTS); do parseUnderscores $PROJECT; done)")"
 	CHOICE="$(parseSpaces "$ANS")"
 
 	case $CHOICE in
@@ -268,7 +266,7 @@ summarize()
 {
 	PROJECT="$1"
 
-	show "Choose one activity (a)ll or (q)uit" "$(for ACTIVITY in $(ls $PROJECTS/$PROJECT); do parseUnderscores "$ACTIVITY"; done)"
+	ANS="$(show "Choose one activity (a)ll or (q)uit" "$(for ACTIVITY in $(ls $PROJECTS/$PROJECT); do parseUnderscores "$ACTIVITY"; done)")"
 	CHOICE="$(parseSpaces "$ANS")"
 
 	case "$CHOICE" in 
@@ -304,33 +302,33 @@ main()
 	PROJECTS="$CLIENTS/$CLIENT"
 
 	while true; do
-		show "$CLIENT: What do you want to do?" "(s)tart (st)op (sta)tus (sum)marize (h)elp (sw)itch (q)uit"
+		ANS="$(show "$CLIENT: What do you want to do?" "start stop status summarize help switch quit")"
 		CHOICE="$ANS"
     	case "$CHOICE" in
-        	"s")
+        	"start")
             	if [[ -f "$ACTIVE" ]]; then
                 	show "A timer is already running..."
             	else
                 	chooseProject "startActivity"
             	fi
             	;;
-        	"sum")
+        	"summarize")
             	chooseProject "summarize"
             	;;
-        	"st")
+        	"stop")
             	stopActivity
             	;;
-        	"sta")
+        	"status")
             	showStatus
             	;;
-        	"h")
+        	"help")
             	show "TrackMe - A time tracking program" "Usage: trackme [option] Options: start        - start a timer stop         - stop a running timer, if one exists. status       - check status of running timer, if any. summarize    - summarize time for a specified project and/or activity "
             	;;
-        	"sw")
+        	"switch")
             	main
             	exit
             	;;
-        	"q")
+        	"quit")
             	exit
             	;;
     	esac
