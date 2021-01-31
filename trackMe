@@ -83,6 +83,66 @@ parseUnderscores()
 echo "$(echo $@ | sed s/\_/\ /g)"
 }
 
+chooseClient()
+{
+	SCRIPT=$1
+
+	ANS="$(show "Choose an existing client, create a (n)ew or (q)uit:" "$(ls $CLIENTS)")"
+	CHOICE="$(parseSpaces "$ANS")"
+
+	case "$CHOICE" in
+    	"q")
+        	show "Exiting..."
+        	pkill trackMe
+        	exit
+       ;;
+    	"n")
+        	createClient 
+        	return
+       ;;
+    	*)
+        	pushd "$CLIENTS" > /dev/zero
+        	for CLIENT in *; do
+            	if [[ "$CLIENT" == "$CHOICE" ]]; then
+                	popd > /dev/zero
+                	return
+            	fi
+        	done
+            	show "Client \"$CHOICE\" does not exist, try again or create it (n)."
+            	chooseClient "$SCRIPT"
+       ;;
+	esac
+}
+
+chooseProject()
+{
+	SCRIPT="$1"
+	ANS="$(show "Choose an existing project, create a (n)ew or (q)uit" "$(ls $PROJECTS)")"
+	CHOICE="$(parseSpaces "$ANS")"
+
+	case $CHOICE in
+    	"q")
+        	exit
+        ;;
+    	"n")
+        	createProject "$SCRIPT"
+        ;;
+    	*)
+        	pushd "$PROJECTS" > /dev/zero
+        	for PROJECT in *; do
+            	if [[ "$PROJECT" == "$CHOICE" ]]; then
+                	"$SCRIPT" "$CHOICE"
+                	popd > /dev/zero
+                	return
+            	fi
+        	done
+        	show "Project \"$(parseUnderscores "$CHOICE")\" does not exist, try again or create it (n)."
+            chooseProject "$SCRIPT"
+            return
+        ;;
+	esac
+}
+
 createClient()
 {
 	SCRIPT="$1"
@@ -113,7 +173,7 @@ startActivity()
     	gitpull & disown
 	fi
 
-	ANS="$(show "What are you doing?" "$(for ACT in $(ls $PROJECTS/$PROJECT); do parseUnderscores $ACT; done)")"
+	ANS="$(show "What are you doing?" "$(ls $PROJECTS/$PROJECT)")"
 	ACTIVITY=$(parseSpaces "$ANS")
 
 	if [[ "$ACTIVITY" == "" ]]; then
@@ -154,67 +214,6 @@ stopActivity()
 	fi
 
 	show "Time entry added to $(parseUnderscores "$ACTIVITY")!"
-}
-
-chooseClient()
-{
-	SCRIPT=$1
-
-	AVAILABLE_CLIENTS="$(for CLIENT in $(ls $CLIENTS); do parseUnderscores $CLIENT; done)"
-	ANS="$(show "Choose an existing client, create a (n)ew or (q)uit:" "$AVAILABLE_CLIENTS")"
-	CHOICE="$(parseSpaces "$ANS")"
-
-	case "$CHOICE" in
-    	"q")
-        	show "Exiting..."
-        	pkill trackMe
-        	exit
-       ;;
-    	"n")
-        	createClient 
-        	return
-       ;;
-    	*)
-        	pushd "$CLIENTS" > /dev/zero
-        	for CLIENT in *; do
-            	if [[ "$CLIENT" == "$CHOICE" ]]; then
-                	popd > /dev/zero
-                	return
-            	fi
-        	done
-            	show "Client \"$CHOICE\" does not exist, try again or create it (n)."
-            	chooseClient "$SCRIPT"
-       ;;
-	esac
-}
-
-chooseProject()
-{
-	SCRIPT="$1"
-	ANS="$(show "Choose an existing project, create a (n)ew or (q)uit" "$(for PROJECT in $(ls $PROJECTS); do parseUnderscores $PROJECT; done)")"
-	CHOICE="$(parseSpaces "$ANS")"
-
-	case $CHOICE in
-    	"q")
-        	exit
-        ;;
-    	"n")
-        	createProject "$SCRIPT"
-        ;;
-    	*)
-        	pushd "$PROJECTS" > /dev/zero
-        	for PROJECT in *; do
-            	if [[ "$PROJECT" == "$CHOICE" ]]; then
-                	"$SCRIPT" "$CHOICE"
-                	popd > /dev/zero
-                	return
-            	fi
-        	done
-        	show "Project \"$(parseUnderscores "$CHOICE")\" does not exist, try again or create it (n)."
-            chooseProject "$SCRIPT"
-            return
-        ;;
-	esac
 }
 
 sum()
@@ -266,7 +265,7 @@ summarize()
 {
 	PROJECT="$1"
 
-	ANS="$(show "Choose one activity (a)ll or (q)uit" "$(for ACTIVITY in $(ls $PROJECTS/$PROJECT); do parseUnderscores "$ACTIVITY"; done)")"
+	ANS="$(show "Choose one activity (a)ll or (q)uit" "$(ls $PROJECTS/$PROJECT)")"
 	CHOICE="$(parseSpaces "$ANS")"
 
 	case "$CHOICE" in 
