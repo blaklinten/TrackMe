@@ -9,12 +9,12 @@ chooseClient()
 	CHOICE="$(parseSpaces "$ANS")"
 
 	case "$CHOICE" in
-    	"quit")
+    	"q")
         	showAndRead "Exiting..."
         	pkill trackMe
         	exit
        ;;
-    	"new")
+    	"n")
         	createClient 
         	exit
        ;;
