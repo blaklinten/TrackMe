@@ -45,7 +45,6 @@ chooseProject()
         	;;
     	"n")
         	createProject 
-        	exit
         	;;
     	*)
         	pushd "$PROJECTS" > /dev/zero
@@ -53,7 +52,7 @@ chooseProject()
             	if [[ "$PROJECT" == "$CHOICE" ]]; then
                 	"$SCRIPT" "$CHOICE"
                 	popd > /dev/zero
-                	exit
+                	return
             	fi
         	done
         	showAndRead "Project \"$(parseUnderscores "$CHOICE")\" does not exist, try again or create it (n)."
