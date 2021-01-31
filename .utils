@@ -29,5 +29,5 @@ PROJECT=$(tail -n 3 "$ACTIVE" | head -n 2 | tail -n 1)
 START=$(tail -n 1 "$ACTIVE")
 END=$(date +%s)
 
-showAndRead "Timer running for $ACTIVITY on $PROJECT\nStarted at $(date --date="@$START")\nRunning for $(diff "$START" "$END")."
+showAndRead "Timer running for $ACTIVITY on $PROJECT Started at $(date --date="@$START"). Running for $(diff "$START" "$END")."
 }
