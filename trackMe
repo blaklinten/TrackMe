@@ -17,16 +17,16 @@ if [[ ! -f "$ACTIVE" ]]; then
     export CLIENT=$(chooseClient)
 else
     export CLIENT=$(head -n 1 "$ACTIVE")
-    dmenu -p "Client $(parseUnderscores "$CLIENT") is running a timer."
+    showAndRead "Client $(parseUnderscores "$CLIENT") is running a timer."
 fi
 export PROJECTS="$CLIENTS/$CLIENT"
 
 while true; do
-    CHOICE=$(cat $WD/.choices | dmenu -i -p "What do you want to do?")
+    CHOICE=$(showAndRead "What do you want to do?" "$(cat $WD/.choices)")
     case "$CHOICE" in
         "start")
             if [[ -f "$ACTIVE" ]]; then
-                dmenu -p "A timer is already running..."
+                showAndRead "A timer is already running..."
             else
                 chooseProject "startActivity"
             fi

@@ -1,5 +1,12 @@
 #!/bin/bash
 
+showAndRead()
+{
+	INFO="$1"
+	CHOICES="$2"
+	echo "$CHOICES" | dmenu -i -p "$INFO"
+}
+
 diff()
 {
 	let "DIFF = $2 - $1"
@@ -13,7 +20,7 @@ diff()
 showStatus()
 {
 if [[ ! -f "$ACTIVE" ]]; then
-    echo "No active timer running!" | dmenu
+    showAndRead "No active timer running!"
     exit
 fi
 
@@ -22,5 +29,5 @@ PROJECT=$(tail -n 3 "$ACTIVE" | head -n 2 | tail -n 1)
 START=$(tail -n 1 "$ACTIVE")
 END=$(date +%s)
 
-echo -e "Timer running for $ACTIVITY on $PROJECT\nStarted at $(date --date="@$START")\nRunning for $(diff "$START" "$END")." | dmenu
+showAndRead "Timer running for $ACTIVITY on $PROJECT\nStarted at $(date --date="@$START")\nRunning for $(diff "$START" "$END")."
 }

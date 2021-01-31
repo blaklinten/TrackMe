@@ -5,13 +5,12 @@ chooseClient()
 	export SCRIPT=$1
 
 	AVAILABLE_CLIENTS="$(for CLIENT in $(ls $CLIENTS); do parseUnderscores $CLIENT; done)"
-	echo $AVAILABLE_CLIENTS
-	ANS="$(dmenu -i -p "Choose an existing client, create a (n)ew or (q)uit: $AVAILABLE_CLIENTS")"
-	CHOICE=$(parseSpaces "$ANS")
+	ANS="$(showAndRead "Choose an existing client, create a (n)ew or (q)uit:" "$AVAILABLE_CLIENTS")"
+	CHOICE="$(parseSpaces "$ANS")"
 
-	case $CHOICE in
+	case "$CHOICE" in
     	"quit")
-        	echo "Exiting..." | dmenu
+        	showAndRead "Exiting..."
         	pkill trackMe
         	exit
        ;;
@@ -28,23 +27,23 @@ chooseClient()
                 	exit
             	fi
         	done
-            	echo "Client \"$CHOICE\" does not exist, try again or create it (n)." | dmenu
-            	chooseClient $SCRIPT
+            	showAndRead "Client \"$CHOICE\" does not exist, try again or create it (n)."
+            	chooseClient "$SCRIPT"
        ;;
 	esac
 }
 
 chooseProject()
 {
-	export SCRIPT=$1
+	export SCRIPT="$1"
 
-	CHOICE=$(parseSpaces $(echo -e "Choose an existing project, create a\nnew\nor\nquit\n$(for PROJECT in $(ls $PROJECTS); do parseUnderscores $PROJECT; done)" | dmenu -i))
+	CHOICE="$(parseSpaces $(showAndRead "Choose an existing project, create a (n)ew or (q)uit" "$(for PROJECT in $(ls $PROJECTS); do parseUnderscores $PROJECT; done)"))"
 
 	case $CHOICE in
-    	"quit")
+    	"q")
         	exit
         	;;
-    	"new")
+    	"n")
         	createProject 
         	exit
         	;;
@@ -57,7 +56,7 @@ chooseProject()
                 	exit
             	fi
         	done
-        	echo "Project \"$(parseUnderscores "$CHOICE")\" does not exist, try again or create it (n)." | dmenu
+        	showAndRead "Project \"$(parseUnderscores "$CHOICE")\" does not exist, try again or create it (n)."
             	chooseProject "$SCRIPT"
             	exit
         	;;
