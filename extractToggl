@@ -1,10 +1,12 @@
 #!/bin/bash
 # Setting delimiter for 'cat'
 IFS=$'\n'
+FILE="$(realpath "$1")"
+TARGET_DIR="/home/blaklinten/conversion"
 
 # Go through all lines and filter out the info (groups) we want
 # and save in files for later access
-for line in $(cat /home/blaklinten/TrackMe/.raw_data/toggl); do
+for line in $(cat "$FILE"); do
     echo $line | sed 's/,/\n/g' | sed -n 3p | sed 's/\ /\_/g' | sed 's/\//\&/g' >> group3
     echo $line | sed 's/,/\n/g' | sed -n 4p | sed 's/\ /\_/g' | sed 's/\//\&/g' >> group4
     echo $line | sed 's/,/\n/g' | sed -n 6p | sed 's/\ /\_/g' | sed 's/\//\&/g' >> group6
@@ -49,11 +51,11 @@ for client in $(cat group3); do
     END_DATE_3=$(date --date=$END_DATE | sed 's/CEST/CET/' | tail -c 10)
     
     # Write the result to corresponding files in directory tree
-    echo "Started at $START_DATE_1$START_TIME$START_DATE_3" >> $client/$project/$DESCRIPTION
+    echo "Started at $START_DATE_1$START_TIME$START_DATE_3" >> $TARGET_DIR/$client/$project/$DESCRIPTION
 
-    echo "Ended at $END_DATE_1$END_TIME$END_DATE_3" >> $client/$project/$DESCRIPTION
+    echo "Ended at $END_DATE_1$END_TIME$END_DATE_3" >> $TARGET_DIR/$client/$project/$DESCRIPTION
 
-    echo "Duration: $DURATION" >> $client/$project/$DESCRIPTION
+    echo "Duration: $DURATION" >> $TARGET_DIR/$client/$project/$DESCRIPTION
 
     # Increase counter to fetch next line (entry)
     let "LINENUMBER = $LINENUMBER + 1"
