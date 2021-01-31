@@ -9,10 +9,10 @@ startActivity()
     	gitpull & disown
 	fi
 
-	ACTIVITY=$(parseSpaces $(echo -e "What are you doing?\n$(for ACT in $(ls $PROJECTS/$PROJECT); do parseUnderscores $ACT; done)" | dmenu -i))
+	ACTIVITY=$(parseSpaces "$(showAndRead "What are you doing?" "$(for ACT in $(ls $PROJECTS/$PROJECT); do parseUnderscores $ACT; done)")")
 
 	if [[ "$ACTIVITY" == "" ]]; then
-    	echo "You must enter a valid activity name." | dmenu
+    	showAndRead "You must enter a valid activity name."
     	startActivity "$PROJECT"
     	exit
 	fi
@@ -24,13 +24,13 @@ startActivity()
 	echo "$PROJECT" >> "$ACTIVE"
 	echo "$START" >> "$ACTIVE"
 
-	echo "$(parseUnderscores $ACTIVITY)@$(parseUnderscores $PROJECT) started at $(date --date="@$START")" | dmenu
+	showAndRead "$(parseUnderscores $ACTIVITY)@$(parseUnderscores $PROJECT) started at $(date --date="@$START")"
 }
 
 stopActivity()
 {
 	if [ ! -f "$ACTIVE" ]; then
-    	echo "No timer active, start one?" | dmenu
+    	showAndRead "No timer active, start one?"
     	exit
 	fi
 
@@ -48,5 +48,5 @@ stopActivity()
     	gitpush "$ACTIVITY" "$PROJECT" & disown
 	fi
 
-	echo "Time entry added to $(parseUnderscores "$ACTIVITY")!" | dmenu
+	showAndRead "Time entry added to $(parseUnderscores "$ACTIVITY")!"
 }

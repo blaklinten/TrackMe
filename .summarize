@@ -27,7 +27,7 @@ sumActivity()
 
 	sum "$ACTIVITY"
 
-	echo "Total time = $HOURS:$MINUTES:$SEC" | dmenu
+	showAndRead "Total time = $HOURS:$MINUTES:$SEC"
 }
 
 sumProject()
@@ -42,20 +42,20 @@ sumProject()
 		sum "$PROJECT/$ACTIVITY"
 	done
 
-	echo "Total time = $HOURS:$MINUTES:$SEC" | dmenu
+	showAndRead "Total time = $HOURS:$MINUTES:$SEC"
 }
 
 summarize()
 {
 	PROJECT="$1"
 
-	CHOICE=$(parseSpaces $(echo -e "Choose one activity \nall\nor\nquit\n$(for ACTIVITY in $(ls $PROJECTS/$PROJECT); do parseUnderscores "$ACTIVITY"; done)" | dmenu -i))
+	CHOICE="$(parseSpaces $(showAndRead "Choose one activity (a)ll or (q)uit" "$(for ACTIVITY in $(ls $PROJECTS/$PROJECT); do parseUnderscores "$ACTIVITY"; done)"))"
 
-	case $CHOICE in 
-    	"quit")
+	case "$CHOICE" in 
+    	"q")
         	exit
     	;;
-    	"all")
+    	"a")
         	sumProject "$PROJECTS/$PROJECT"
         	exit
     	;;
@@ -63,12 +63,12 @@ summarize()
         	pushd "$PROJECTS/$PROJECT" > /dev/null
         	for ACTIVITY in *; do
             	if [[ "$CHOICE" == "$ACTIVITY" ]]; then
-                	sumEntries "$PROJECTS/$PROJECT/$CHOICE"
+                	sumActivity "$PROJECTS/$PROJECT/$CHOICE"
                 	popd > /dev/null
                 	exit
             	fi
         	done
-        	echo "Activity \"$CHOICE\" does not exist, try again or exit (q)." | dmenu
+        	showAndRead "Activity \"$CHOICE\" does not exist, try again or exit (q)."
         	summarize "$PROJECT"
         	;;
 	esac

@@ -2,7 +2,7 @@
 
 createClient()
 {
-	CLIENT=$(parseSpaces $(echo "Enter name of new client:" | dmenu))
+	CLIENT=$(parseSpaces $(showAndRead "Enter name of new client:"))
 
 	mkdir "$CLIENTS/$CLIENT"
 
@@ -11,7 +11,7 @@ createClient()
 
 createProject()
 {
-	projectName=$(parseSpaces $(echo "Enter name of new project:" | dmenu))
+	projectName=$(parseSpaces $(showAndRead "Enter name of new project:"))
 
 	mkdir "$PROJECTS/$projectName"
 
