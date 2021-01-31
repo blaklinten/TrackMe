@@ -4,6 +4,10 @@ IFS=$'\n'
 FILE="$(realpath "$1")"
 TARGET_DIR="/home/blaklinten/conversion"
 
+if [[ ! -d "$TARGET_DIR" ]]; then
+	mkdir "$TARGET_DIR"
+fi
+
 # Go through all lines and filter out the info (groups) we want
 # and save in files for later access
 for line in $(cat "$FILE"); do
