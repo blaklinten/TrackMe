@@ -3,52 +3,338 @@
 #########################################################
 # This is a script that helps me keep track of my time. #
 #########################################################
+# These are the configuration options
+#
+export GITSYNC=no
 
-source configure
-source $WD/.choose
-source $WD/.create
-source $WD/.gitFunctions
-source $WD/.parse
-source $WD/.startStop
-source $WD/.summarize
-source $WD/.utils
+###### TODO ######
+# Fix info if    #
+# git is not     #
+# available      #
+##################
 
-if [[ ! -f "$ACTIVE" ]]; then
-    export CLIENT=$(chooseClient)
-else
-    export CLIENT=$(head -n 1 "$ACTIVE")
-    showAndRead "Client $(parseUnderscores "$CLIENT") is running a timer."
+export WD=$HOME/Git/TrackMe
+export CLIENTS=$HOME/.trackme
+export ACTIVE=$CLIENTS/active
+
+if [[ ! -d "$CLIENTS" ]]; then
+    mkdir -p "$CLIENTS"
+    echo "Creating working env..."
 fi
-export PROJECTS="$CLIENTS/$CLIENT"
 
-while true; do
-    CHOICE=$(showAndRead "What do you want to do?" "$(cat $WD/.choices)")
-    case "$CHOICE" in
-        "start")
-            if [[ -f "$ACTIVE" ]]; then
-                showAndRead "A timer is already running..."
-            else
-                chooseProject "startActivity"
-            fi
-            ;;
-        "summarize")
-            chooseProject "summarize"
-            ;;
-        "stop")
-            stopActivity
-            ;;
-        "status")
-            showStatus
-            ;;
-        "help")
-            xmessage -c -file $WD/.man
-            ;;
-        "switch")
-            trackMe
-            exit
-            ;;
-        "quit")
-            exit
-            ;;
-    esac
-done
+gitPull()
+{
+	pushd "$CLIENTS" &> /dev/null
+	git pull &> /dev/null
+	popd &> /dev/null
+}
+
+gitPush()
+{
+	ACTIVITY="$1"
+	PROJECT="$2"
+
+	pushd "$CLIENTS" &> /dev/null
+	git add . &> /dev/null
+	git commit -m "Time entry for $ACTIVITY, $PROJECT" &> /dev/null
+	git push &> /dev/null
+	popd &> /dev/null
+}
+
+show()
+{
+	INFO="$1"
+	CHOICES="$2"
+	clear
+	printf "%s\n%s\n" "$INFO" "$CHOICES"
+	read ANS
+}
+
+diff()
+{
+	let "DIFF = $2 - $1"
+	let "SECONDS = DIFF % 60"
+	let "MINUTES = (DIFF % 3600) / 60"
+	let "HOURS = DIFF / 3600"
+
+	echo "$HOURS:$MINUTES:$SECONDS"
+}
+
+showStatus()
+{
+if [[ ! -f "$ACTIVE" ]]; then
+    show "No active timer running!"
+    return
+fi
+
+ACTIVITY=$(tail -n 3 "$ACTIVE" | head -n 1 )
+PROJECT=$(tail -n 3 "$ACTIVE" | head -n 2 | tail -n 1)
+START=$(tail -n 1 "$ACTIVE")
+END=$(date +%s)
+
+show "Timer running for $ACTIVITY on $PROJECT Started at $(date --date="@$START"). Running for $(diff "$START" "$END")."
+}
+
+parseSpaces()
+{
+echo "$(echo $@ | sed s/\ /\_/g)"
+}
+
+parseUnderscores()
+{
+echo "$(echo $@ | sed s/\_/\ /g)"
+}
+
+createClient()
+{
+	SCRIPT="$1"
+	show "Enter name of new client:"
+	CLIENT=$(parseSpaces "$ANS")
+
+	mkdir "$CLIENTS/$CLIENT"
+
+	chooseClient "$SCRIPT"
+}
+
+createProject()
+{
+	SCRIPT="$1"
+	show "Enter name of new project:"
+	projectName=$(parseSpaces "$ANS")
+
+	mkdir "$PROJECTS/$projectName"
+
+	chooseProject "$SCRIPT"
+}
+
+startActivity()
+{
+	PROJECT="$1"
+
+	if [[ "$GITSYNC" == "yes" ]]; then
+    	gitpull & disown
+	fi
+
+	show "What are you doing?" "$(for ACT in $(ls $PROJECTS/$PROJECT); do parseUnderscores $ACT; done)"
+	ACTIVITY=$(parseSpaces "$ANS")
+
+	if [[ "$ACTIVITY" == "" ]]; then
+    	show "You must enter a valid activity name."
+    	startActivity "$PROJECT"
+    	return
+	fi
+
+	START=$(date +%s)
+
+	echo "$CLIENT" >> "$ACTIVE"
+	echo "$ACTIVITY" >> "$ACTIVE"
+	echo "$PROJECT" >> "$ACTIVE"
+	echo "$START" >> "$ACTIVE"
+
+	show "$(parseUnderscores $ACTIVITY)@$(parseUnderscores $PROJECT) started at $(date --date="@$START")"
+}
+
+stopActivity()
+{
+	if [ ! -f "$ACTIVE" ]; then
+    	show "No timer active, start one?"
+    	return
+	fi
+
+	END=$(date +%s)
+	ACTIVITY=$(tail -n 3 "$ACTIVE" | head -n 1)
+	PROJECT=$(tail -n 3 "$ACTIVE" | head -n 2 | tail -n 1)
+	START=$(tail -n 1 "$ACTIVE")
+
+	echo "Started at $(date --date="@$START")" >> "$PROJECTS/$PROJECT/$ACTIVITY"
+	echo "Ended at $(date --date="@$END")" >> "$PROJECTS/$PROJECT/$ACTIVITY"
+	echo "Duration: $(diff "$START" "$END")" >> "$PROJECTS/$PROJECT/$ACTIVITY"
+	rm "$ACTIVE"
+
+	if [[ "$GITSYNC" == "yes" ]]; then
+    	gitpush "$ACTIVITY" "$PROJECT" & disown
+	fi
+
+	show "Time entry added to $(parseUnderscores "$ACTIVITY")!"
+}
+
+chooseClient()
+{
+	SCRIPT=$1
+
+	AVAILABLE_CLIENTS="$(for CLIENT in $(ls $CLIENTS); do parseUnderscores $CLIENT; done)"
+	show "Choose an existing client, create a (n)ew or (q)uit:" "$AVAILABLE_CLIENTS"
+	CHOICE="$(parseSpaces "$ANS")"
+
+	case "$CHOICE" in
+    	"q")
+        	show "Exiting..."
+        	pkill trackMe
+        	exit
+       ;;
+    	"n")
+        	createClient 
+        	return
+       ;;
+    	*)
+        	pushd "$CLIENTS" > /dev/zero
+        	for CLIENT in *; do
+            	if [[ "$CLIENT" == "$CHOICE" ]]; then
+                	popd > /dev/zero
+                	return
+            	fi
+        	done
+            	show "Client \"$CHOICE\" does not exist, try again or create it (n)."
+            	chooseClient "$SCRIPT"
+       ;;
+	esac
+}
+
+chooseProject()
+{
+	SCRIPT="$1"
+	show "Choose an existing project, create a (n)ew or (q)uit" "$(for PROJECT in $(ls $PROJECTS); do parseUnderscores $PROJECT; done)"
+	CHOICE="$(parseSpaces "$ANS")"
+
+	case $CHOICE in
+    	"q")
+        	exit
+        ;;
+    	"n")
+        	createProject "$SCRIPT"
+        ;;
+    	*)
+        	pushd "$PROJECTS" > /dev/zero
+        	for PROJECT in *; do
+            	if [[ "$PROJECT" == "$CHOICE" ]]; then
+                	"$SCRIPT" "$CHOICE"
+                	popd > /dev/zero
+                	return
+            	fi
+        	done
+        	show "Project \"$(parseUnderscores "$CHOICE")\" does not exist, try again or create it (n)."
+            chooseProject "$SCRIPT"
+            return
+        ;;
+	esac
+}
+
+sum()
+{
+	ACTIVITY="$1"
+    for LINE in $(sed -n '0~3p' "$ACTIVITY"); do
+        if [[ ! "$LINE" == "Duration:" ]]; then
+            let "HOURS = $HOURS + $(echo "$LINE" | sed -n -e 's/^\(.*\):\(.*\):\(.*\)/\1/p')"
+            let "MINUTES = $MINUTES + $(echo "$LINE" | sed -n -e 's/^\(.*\):\(.*\):\(.*\)/\2/p')"
+            let "SEC = $SEC + $(echo "$LINE" | sed -n -e 's/^\(.*\):\(.*\):\(.*\)/\3/p')"
+        fi
+    done
+
+	let "HOURS = $HOURS + ($MINUTES + $SEC / 60) / 60"
+	let "MINUTES = ($MINUTES + $SEC / 60) % 60"
+	let "SEC = $SEC % 60"
+
+}
+
+sumActivity()
+{
+	ACTIVITY="$1"
+
+	HOURS=0
+	MINUTES=0
+	SEC=0
+
+	sum "$ACTIVITY"
+
+	show "Total time = $HOURS:$MINUTES:$SEC"
+}
+
+sumProject()
+{
+	PROJECT="$1"
+
+	HOURS=0
+	MINUTES=0
+	SEC=0
+
+	for ACTIVITY in $(ls "$PROJECT"); do
+		sum "$PROJECT/$ACTIVITY"
+	done
+
+	show "Total time = $HOURS:$MINUTES:$SEC"
+}
+
+summarize()
+{
+	PROJECT="$1"
+
+	show "Choose one activity (a)ll or (q)uit" "$(for ACTIVITY in $(ls $PROJECTS/$PROJECT); do parseUnderscores "$ACTIVITY"; done)"
+	CHOICE="$(parseSpaces "$ANS")"
+
+	case "$CHOICE" in 
+    	"q")
+        	exit
+    	;;
+    	"a")
+        	sumProject "$PROJECTS/$PROJECT"
+    	;;
+    	*)
+        	pushd "$PROJECTS/$PROJECT" > /dev/null
+        	for ACTIVITY in *; do
+            	if [[ "$CHOICE" == "$ACTIVITY" ]]; then
+                	sumActivity "$PROJECTS/$PROJECT/$CHOICE"
+                	popd > /dev/null
+                	return
+            	fi
+        	done
+        	show "Activity \"$CHOICE\" does not exist, try again or exit (q)."
+        	summarize "$PROJECT"
+        	;;
+	esac
+}
+
+main()
+{
+	if [[ ! -f "$ACTIVE" ]]; then
+		chooseClient
+	else
+    	CLIENT=$(head -n 1 "$ACTIVE")
+    	show "Client $(parseUnderscores "$CLIENT") is running a timer."
+	fi
+	PROJECTS="$CLIENTS/$CLIENT"
+
+	while true; do
+		show "$CLIENT: What do you want to do?" "(s)tart (st)op (sta)tus (sum)marize (h)elp (sw)itch (q)uit"
+		CHOICE="$ANS"
+    	case "$CHOICE" in
+        	"s")
+            	if [[ -f "$ACTIVE" ]]; then
+                	show "A timer is already running..."
+            	else
+                	chooseProject "startActivity"
+            	fi
+            	;;
+        	"sum")
+            	chooseProject "summarize"
+            	;;
+        	"st")
+            	stopActivity
+            	;;
+        	"sta")
+            	showStatus
+            	;;
+        	"h")
+            	show "TrackMe - A time tracking program" "Usage: trackme [option] Options: start        - start a timer stop         - stop a running timer, if one exists. status       - check status of running timer, if any. summarize    - summarize time for a specified project and/or activity "
+            	;;
+        	"sw")
+            	main
+            	exit
+            	;;
+        	"q")
+            	exit
+            	;;
+    	esac
+	done
+}
+
+main
