@@ -221,9 +221,12 @@ sum()
 	ACTIVITY="$1"
     for LINE in $(sed -n '0~3p' "$ACTIVITY"); do
         if [[ ! "$LINE" == "Duration:" ]]; then
-            let "HOURS = $HOURS + $(echo "$LINE" | sed -n -e 's/^\(.*\):\(.*\):\(.*\)/\1/p')"
-            let "MINUTES = $MINUTES + $(echo "$LINE" | sed -n -e 's/^\(.*\):\(.*\):\(.*\)/\2/p')"
-            let "SEC = $SEC + $(echo "$LINE" | sed -n -e 's/^\(.*\):\(.*\):\(.*\)/\3/p')"
+        	NEXT_H="$(echo "$LINE" | sed -n -e 's/^\(.*\):\(.*\):\(.*\)/\1/p')"
+            NEXT_M="$(echo "$LINE" | sed -n -e 's/^\(.*\):\(.*\):\(.*\)/\2/p')"
+            NEXT_S="$(echo "$LINE" | sed -n -e 's/^\(.*\):\(.*\):\(.*\)/\3/p')"
+            let "HOURS = $HOURS + 10#$NEXT_H"
+            let "MINUTES = $MINUTES + 10#$NEXT_M"
+            let "SEC = $SEC + 10#$NEXT_S"
         fi
     done
 
