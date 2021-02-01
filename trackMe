@@ -112,7 +112,7 @@ startActivity()
 	PROJECT="$1"
 
 	if [[ "$GITSYNC" == "yes" ]]; then
-    	gitpull & disown
+    	gitPull & disown
 	fi
 
 	show "What are you doing?" "$(for ACT in $(ls $PROJECTS/$PROJECT); do parseUnderscores $ACT; done)"
@@ -152,7 +152,7 @@ stopActivity()
 	rm "$ACTIVE"
 
 	if [[ "$GITSYNC" == "yes" ]]; then
-    	gitpush "$ACTIVITY" "$PROJECT" & disown
+    	gitPush "$ACTIVITY" "$PROJECT" & disown
 	fi
 
 	show "Time entry added to $(parseUnderscores "$ACTIVITY")!"
