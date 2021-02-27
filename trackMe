@@ -1,11 +1,11 @@
-#!/bin/bash
+#!/usr/local/bin/bash
 
 #########################################################
 # This is a script that helps me keep track of my time. #
 #########################################################
 # These are the configuration options
 #
-export GITSYNC=no
+export GITSYNC=yes
 
 ###### TODO ######
 # Fix info if    #
@@ -72,7 +72,7 @@ PROJECT=$(tail -n 3 "$ACTIVE" | head -n 2 | tail -n 1)
 START=$(tail -n 1 "$ACTIVE")
 END=$(date +%s)
 
-show "Timer running for $ACTIVITY on $PROJECT Started at $(date --date="@$START"). Running for $(diff "$START" "$END")."
+show "Timer running for $ACTIVITY on $PROJECT Started at $(date -r "$START"). Running for $(diff "$START" "$END")."
 }
 
 parseSpaces()
@@ -131,7 +131,7 @@ startActivity()
 	echo "$PROJECT" >> "$ACTIVE"
 	echo "$START" >> "$ACTIVE"
 
-	show "$(parseUnderscores $ACTIVITY)@$(parseUnderscores $PROJECT) started at $(date --date="@$START")"
+	show "$(parseUnderscores $ACTIVITY)@$(parseUnderscores $PROJECT) started at $(date -r "$START")"
 }
 
 stopActivity()
@@ -146,8 +146,8 @@ stopActivity()
 	PROJECT=$(tail -n 3 "$ACTIVE" | head -n 2 | tail -n 1)
 	START=$(tail -n 1 "$ACTIVE")
 
-	echo "Started at $(date --date="@$START")" >> "$PROJECTS/$PROJECT/$ACTIVITY"
-	echo "Ended at $(date --date="@$END")" >> "$PROJECTS/$PROJECT/$ACTIVITY"
+	echo "Started at $(date -r "$START")" >> "$PROJECTS/$PROJECT/$ACTIVITY"
+	echo "Ended at $(date -r "$END")" >> "$PROJECTS/$PROJECT/$ACTIVITY"
 	echo "Duration: $(diff "$START" "$END")" >> "$PROJECTS/$PROJECT/$ACTIVITY"
 	rm "$ACTIVE"
 
