@@ -1,4 +1,4 @@
-#!/bin/bash
+ !/bin/bash
 
 #########################################################
 # This is a script that helps me keep track of my time. #
@@ -21,6 +21,8 @@ if [[ ! -d "$CLIENTS" ]]; then
     mkdir -p "$CLIENTS"
     echo "Creating working env..."
 fi
+
+PS3="Make your choice! "
 
 gitPull()
 {
@@ -46,8 +48,16 @@ show()
 	INFO="$1"
 	CHOICES="$2"
 	clear
-	printf "%s\n%s\n" "$INFO" "$CHOICES"
-	read ANS
+	printf "%s\n" "$INFO"
+
+	if [ -n "$CHOICES" ];then
+		select CHOICE in $CHOICES; do
+			ANS=$CHOICE
+			break
+		done
+	else
+		read ANS
+	fi
 }
 
 diff()
@@ -115,7 +125,7 @@ startActivity()
     	gitPull & disown
 	fi
 
-	show "What are you doing?" "$(for ACT in $(ls $PROJECTS/$PROJECT); do parseUnderscores $ACT; done)"
+	show "What are you doing?" "$(ls $PROJECTS/$PROJECT)"
 	ACTIVITY=$(parseSpaces "$ANS")
 
 	if [[ "$ACTIVITY" == "" ]]; then
@@ -162,17 +172,17 @@ chooseClient()
 {
 	SCRIPT=$1
 
-	AVAILABLE_CLIENTS="$(for CLIENT in $(ls $CLIENTS); do parseUnderscores $CLIENT; done)"
-	show "Choose an existing client, create a (n)ew or (q)uit:" "$AVAILABLE_CLIENTS"
+	AVAILABLE_CLIENTS="$(ls $CLIENTS) new quit"
+	show "Choose an existing client, create a new or quit:" "$AVAILABLE_CLIENTS"
 	CHOICE="$(parseSpaces "$ANS")"
 
 	case "$CHOICE" in
-    	"q")
+    	"quit")
         	show "Exiting..."
         	pkill trackMe
         	exit
        ;;
-    	"n")
+    	"new")
         	createClient 
         	return
        ;;
@@ -184,7 +194,7 @@ chooseClient()
                 	return
             	fi
         	done
-            	show "Client \"$CHOICE\" does not exist, try again or create it (n)."
+            	show "Client \"$CHOICE\" does not exist, try again or create it (new)."
             	chooseClient "$SCRIPT"
        ;;
 	esac
@@ -193,14 +203,14 @@ chooseClient()
 chooseProject()
 {
 	SCRIPT="$1"
-	show "Choose an existing project, create a (n)ew or (q)uit" "$(for PROJECT in $(ls $PROJECTS); do parseUnderscores $PROJECT; done)"
+	show "Choose an existing project, create a new or quit" "$(ls $PROJECTS) new quit"
 	CHOICE="$(parseSpaces "$ANS")"
 
 	case $CHOICE in
-    	"q")
+    	"quit")
         	exit
         ;;
-    	"n")
+    	"new")
         	createProject "$SCRIPT"
         ;;
     	*)
@@ -212,7 +222,7 @@ chooseProject()
                 	return
             	fi
         	done
-        	show "Project \"$(parseUnderscores "$CHOICE")\" does not exist, try again or create it (n)."
+        	show "Project \"$(parseUnderscores "$CHOICE")\" does not exist, try again or create it (new)."
             chooseProject "$SCRIPT"
             return
         ;;
@@ -271,14 +281,14 @@ summarize()
 {
 	PROJECT="$1"
 
-	show "Choose one activity (a)ll or (q)uit" "$(for ACTIVITY in $(ls $PROJECTS/$PROJECT); do parseUnderscores "$ACTIVITY"; done)"
+	show "Choose one activity all or quit" "$(ls $PROJECTS/$PROJECT) all quit"
 	CHOICE="$(parseSpaces "$ANS")"
 
 	case "$CHOICE" in 
-    	"q")
+    	"quit")
         	exit
     	;;
-    	"a")
+    	"all")
         	sumProject "$PROJECTS/$PROJECT"
     	;;
     	*)
@@ -290,7 +300,7 @@ summarize()
                 	return
             	fi
         	done
-        	show "Activity \"$CHOICE\" does not exist, try again or exit (q)."
+        	show "Activity \"$CHOICE\" does not exist, try again or exit (quit)."
         	summarize "$PROJECT"
         	;;
 	esac
@@ -307,33 +317,33 @@ main()
 	PROJECTS="$CLIENTS/$CLIENT"
 
 	while true; do
-		show "$CLIENT: What do you want to do?" "(s)tart (st)op (sta)tus (sum)marize (h)elp (sw)itch (q)uit"
+		show "$CLIENT: What do you want to do?" "start stop status summarize help switch quit"
 		CHOICE="$ANS"
     	case "$CHOICE" in
-        	"s")
+        	"start")
             	if [[ -f "$ACTIVE" ]]; then
                 	show "A timer is already running..."
             	else
                 	chooseProject "startActivity"
             	fi
             	;;
-        	"sum")
+        	"summarize")
             	chooseProject "summarize"
             	;;
-        	"st")
+        	"stop")
             	stopActivity
             	;;
-        	"sta")
+        	"status")
             	showStatus
             	;;
-        	"h")
+        	"help")
             	show "TrackMe - A time tracking program" "Usage: trackme [option] Options: start        - start a timer stop         - stop a running timer, if one exists. status       - check status of running timer, if any. summarize    - summarize time for a specified project and/or activity "
             	;;
-        	"sw")
+        	"switch")
             	main
             	exit
             	;;
-        	"q")
+        	"quit")
             	exit
             	;;
     	esac
