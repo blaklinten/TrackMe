@@ -70,7 +70,7 @@ PROJECT=$(tail -n 3 "$ACTIVE" | head -n 2 | tail -n 1)
 START=$(tail -n 1 "$ACTIVE")
 END=$(date +%s)
 
-show "Timer running for $ACTIVITY on $PROJECT Started at $(date --date="@$START"). Running for $(diff "$START" "$END")."
+show "Timer running for $(parseUnderscores $ACTIVITY) on $PROJECT Started at $(date --date="@$START"). Running for $(diff "$START" "$END")."
 }
 
 parseSpaces()
@@ -173,7 +173,17 @@ startActivity()
     	gitPull & disown
 	fi
 
-	ANS="$(show "What are you doing?" "$(ls $PROJECTS/$PROJECT)")"
+	ANS="$(show "What are you doing?" "new quit $(ls $PROJECTS/$PROJECT)")"
+	case "$ANS" in
+    	"quit")
+        	show "Exiting..."
+        	pkill trackMe
+        	exit
+       ;;
+    	"new")
+        	ANS=$(show "Enter name of new activity:")
+       ;;
+	esac
 	ACTIVITY=$(parseSpaces "$ANS")
 
 	if [[ "$ACTIVITY" == "" ]]; then
