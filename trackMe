@@ -35,10 +35,20 @@ gitPush()
 	PROJECT="$2"
 
 	pushd "$CLIENTS" &> /dev/null
-	git add . &> /dev/null
-	git commit -m "Time entry for $ACTIVITY, $PROJECT" &> /dev/null
+	git commit -am "Time entry for $ACTIVITY, $PROJECT" &> /dev/null
 	git push &> /dev/null
 	popd &> /dev/null
+}
+
+gitAdd()
+{
+    NEW_ACTIVITY="$1"
+
+	pushd "$CLIENTS" &> /dev/null
+	touch "$NEW_ACTIVITY"
+	git add "$NEW_ACTIVITY" &> /dev/null
+	popd &> /dev/null
+
 }
 
 show()
@@ -182,6 +192,10 @@ startActivity()
        ;;
     	"new")
         	ANS=$(show "Enter name of new activity:")
+
+	        if [[ "$GITSYNC" == "yes" ]]; then
+    	        gitAdd "$CLIENT/$PROJECT/$(parseSpaces "$ANS")" & disown
+	        fi
        ;;
 	esac
 	ACTIVITY=$(parseSpaces "$ANS")
