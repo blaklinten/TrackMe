@@ -5,7 +5,7 @@
 #########################################################
 # These are the configuration options
 #
-export GITSYNC=no
+export GITSYNC="no"
 
 ###### TODO ######
 # Fix info if    #
@@ -13,9 +13,10 @@ export GITSYNC=no
 # available      #
 ##################
 
-export WD=$HOME/Git/TrackMe
-export CLIENTS=$HOME/.trackme
-export ACTIVE=$CLIENTS/active
+export WD="$HOME/Git/TrackMe"
+export CLIENTS="$HOME/.trackme"
+export ACTIVE="$CLIENTS/active"
+export EVENT_FILE="$CLIENTS/events"
 
 if [[ ! -d "$CLIENTS" ]]; then
     mkdir -p "$CLIENTS"
@@ -216,28 +217,54 @@ startActivity()
 	show "$(parseUnderscores $ACTIVITY)@$(parseUnderscores $PROJECT) started at $(date --date="@$START")"
 }
 
+createAndSaveStopEvent()
+{
+    START="$1"
+    END="$2"
+    ACTIVITY="$3"
+    PROJECT="$4"
+
+    echo "Duration: $(diff "$START" "$END")" >> "$EVENT_FILE"
+    echo "Ended at $(date --date="@$END")" >> "$EVENT_FILE"
+    echo "Started at $(date --date="@$START")" >> "$EVENT_FILE"
+    echo "Activity: $ACTIVITY" >> "$EVENT_FILE"
+    echo "Project: $PROJECT" >> "$EVENT_FILE"
+    echo "Client: $CLIENT" >> "$EVENT_FILE"
+}
+
+saveActivity()
+{
+    START="$1"
+    END="$2"
+    ACTIVITY="$3"
+    PROJECT="$4"
+
+    echo "Started at $(date --date="@$START")" >> "$PROJECTS/$PROJECT/$ACTIVITY"
+    echo "Ended at $(date --date="@$END")" >> "$PROJECTS/$PROJECT/$ACTIVITY"
+    echo "Duration: $(diff "$START" "$END")" >> "$PROJECTS/$PROJECT/$ACTIVITY"
+}
+
 stopActivity()
 {
-	if [ ! -f "$ACTIVE" ]; then
-    	show "No timer active, start one?"
-    	return
-	fi
+    if [ ! -f "$ACTIVE" ]; then
+        show "No timer active, start one?"
+        return
+    fi
 
-	END=$(date +%s)
-	ACTIVITY=$(tail -n 3 "$ACTIVE" | head -n 1)
-	PROJECT=$(tail -n 3 "$ACTIVE" | head -n 2 | tail -n 1)
-	START=$(tail -n 1 "$ACTIVE")
+    START=$(tail -n 1 "$ACTIVE")
+    END=$(date +%s)
+    ACTIVITY=$(tail -n 3 "$ACTIVE" | head -n 1)
+    PROJECT=$(tail -n 3 "$ACTIVE" | head -n 2 | tail -n 1)
 
-	echo "Started at $(date --date="@$START")" >> "$PROJECTS/$PROJECT/$ACTIVITY"
-	echo "Ended at $(date --date="@$END")" >> "$PROJECTS/$PROJECT/$ACTIVITY"
-	echo "Duration: $(diff "$START" "$END")" >> "$PROJECTS/$PROJECT/$ACTIVITY"
-	rm "$ACTIVE"
+    saveActivity "$START" "$END" "$ACTIVITY" "$PROJECT"
+    createAndSaveStopEvent "$START" "$END" "$ACTIVITY" "$PROJECT"
+    rm "$ACTIVE"
 
-	if [[ "$GITSYNC" == "yes" ]]; then
-    	gitPush "$ACTIVITY" "$PROJECT" & disown
-	fi
+    if [[ "$GITSYNC" == "yes" ]]; then
+        gitPush "$ACTIVITY" "$PROJECT" & disown
+    fi
 
-	show "Time entry added to $(parseUnderscores "$ACTIVITY")!"
+    show "Time entry added to $(parseUnderscores "$ACTIVITY")!"
 }
 
 sum()
