@@ -71,27 +71,27 @@ diff()
 
 showStatus()
 {
-if [[ ! -f "$ACTIVE" ]]; then
-    show "No active timer running!"
-    return
-fi
+    if [[ ! -f "$ACTIVE" ]]; then
+        show "No active timer running!"
+        return
+    fi
 
-ACTIVITY=$(tail -n 3 "$ACTIVE" | head -n 1 )
-PROJECT=$(tail -n 3 "$ACTIVE" | head -n 2 | tail -n 1)
-START=$(tail -n 1 "$ACTIVE")
-END=$(date +%s)
+    ACTIVITY=$(tail -n 3 "$ACTIVE" | head -n 1 )
+    PROJECT=$(tail -n 3 "$ACTIVE" | head -n 2 | tail -n 1)
+    START=$(tail -n 1 "$ACTIVE")
+    END=$(date +%s)
 
-show "Timer running for $(parseUnderscores $ACTIVITY) on $PROJECT Started at $(date --date="@$START"). Running for $(diff "$START" "$END")."
+    show "Timer running for $(parseUnderscores $ACTIVITY) on $PROJECT Started at $(date --date="@$START"). Running for $(diff "$START" "$END")."
 }
 
 parseSpaces()
 {
-echo "$(echo $@ | sed s/\ /\_/g)"
+    echo "$(echo $@ | sed s/\ /\_/g)"
 }
 
 parseUnderscores()
 {
-echo "$(echo $@ | sed s/\_/\ /g)"
+    echo "$(echo $@ | sed s/\_/\ /g)"
 }
 
 chooseClient()
