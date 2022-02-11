@@ -18,12 +18,17 @@ export CLIENTS="$HOME/.trackme"
 export ACTIVE="$CLIENTS/active"
 export EVENT_FILE="$CLIENTS/events"
 
+PS3="Make your choice! "
+
 if [[ ! -d "$CLIENTS" ]]; then
     mkdir -p "$CLIENTS"
     echo "Creating working env..."
 fi
 
-PS3="Make your choice! "
+
+########################
+# Git helper functions #
+########################
 
 gitPull()
 {
@@ -54,6 +59,10 @@ gitAdd()
 
 }
 
+####################
+# Getting feedback #
+####################
+
 show()
 {
 	INFO="$1"
@@ -71,16 +80,6 @@ show()
 	fi
 }
 
-diff()
-{
-	let "DIFF = $2 - $1"
-	let "SECONDS = DIFF % 60"
-	let "MINUTES = (DIFF % 3600) / 60"
-	let "HOURS = DIFF / 3600"
-
-	echo "$HOURS:$MINUTES:$SECONDS"
-}
-
 showStatus()
 {
     if [[ ! -f "$ACTIVE" ]]; then
@@ -96,6 +95,10 @@ showStatus()
     show "Timer running for $(parseUnderscores $ACTIVITY) on $PROJECT Started at $(date --date="@$START"). Running for $(diff "$START" "$END")."
 }
 
+#######################
+# Text transformation #
+#######################
+
 parseSpaces()
 {
     echo "$(echo $@ | sed s/\ /\_/g)"
@@ -105,6 +108,10 @@ parseUnderscores()
 {
     echo "$(echo $@ | sed s/\_/\ /g)"
 }
+
+###############################
+# Manage clients and projects #
+###############################
 
 createClient()
 {
@@ -127,6 +134,10 @@ createProject()
 
 	chooseProject "$SCRIPT"
 }
+
+#####################
+# Manage Activities #
+#####################
 
 startActivity()
 {
@@ -280,6 +291,20 @@ stopActivity()
     show "Time entry added to $(parseUnderscores "$ACTIVITY")!"
 }
 
+################
+# Calculations #
+################
+
+diff()
+{
+	let "DIFF = $2 - $1"
+	let "SECONDS = DIFF % 60"
+	let "MINUTES = (DIFF % 3600) / 60"
+	let "HOURS = DIFF / 3600"
+
+	echo "$HOURS:$MINUTES:$SECONDS"
+}
+
 sum()
 {
 	ACTIVITY="$1"
@@ -357,6 +382,10 @@ summarize()
 	esac
 }
 
+#############
+# Main loop #
+#############
+
 main()
 {
 	if [[ ! -f "$ACTIVE" ]]; then
@@ -400,5 +429,9 @@ main()
     	esac
 	done
 }
+
+#############
+# Call main #
+#############
 
 main
