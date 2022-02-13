@@ -53,7 +53,6 @@ gitAdd()
     NEW_ACTIVITY="$1"
 
 	pushd "$CLIENTS" &> /dev/null
-	touch "$NEW_ACTIVITY"
 	git add "$NEW_ACTIVITY" &> /dev/null
 	popd &> /dev/null
 
@@ -266,6 +265,10 @@ saveActivity()
     echo "Started at $(date --date="@$START")" >> "$PROJECTS/$PROJECT/$ACTIVITY"
     echo "Ended at $(date --date="@$END")" >> "$PROJECTS/$PROJECT/$ACTIVITY"
     echo "Duration: $(diff "$START" "$END")" >> "$PROJECTS/$PROJECT/$ACTIVITY"
+
+    if [[ "$GITSYNC" == "yes" ]]; then
+        gitAdd "$CLIENT/$PROJECT/$ACTIVITY" & disown
+    fi
 }
 
 stopActivity()
@@ -289,6 +292,80 @@ stopActivity()
     fi
 
     show "Time entry added to $(parseUnderscores "$ACTIVITY")!"
+}
+
+updateActiveState()
+{
+    START="$1"
+    ACTIVITY="$2"
+    PROJECT="$3"
+
+    rm "$ACTIVE"
+
+	echo "$CLIENT" >> "$ACTIVE"
+	echo "$ACTIVITY" >> "$ACTIVE"
+	echo "$PROJECT" >> "$ACTIVE"
+	echo "$START" >> "$ACTIVE"
+}
+
+editRunning()
+{
+    if [ ! -f "$ACTIVE" ]; then
+        show "No timer active, start one?"
+        return
+    fi
+
+    START=$(tail -n 1 "$ACTIVE")
+    ACTIVITY=$(tail -n 3 "$ACTIVE" | head -n 1)
+    PROJECT=$(tail -n 3 "$ACTIVE" | head -n 2 | tail -n 1)
+
+    show "Choose what to edit:" "Start Project Activity"
+	CHOICE="$ANS"
+
+	case "$CHOICE" in
+        "Start")
+            show "Enter new start time: "
+            if [ -z "$ANS" ]; then
+                show "No change..."
+                return
+            fi
+            START=$(date --date $ANS +%s)
+        ;;
+        "Project")
+            show "Choose existing project or enter new project name: " "$(ls $PROJECTS) new"
+            if [ "$ANS" = "new" ]; then
+                show "Enter new project name: "
+            fi
+            if [ -z "$ANS" ]; then
+                show "No change..."
+                return
+            fi
+            rmdir "$PROJECTS/$PROJECT" &> /dev/null
+            PROJECT=$(parseSpaces "$ANS")
+
+            if [ ! -d "$PROJECTS/$PROJECT" ]; then
+                mkdir "$PROJECTS/$PROJECT"
+            fi
+        ;;
+        "Activity")
+            show "Choose existing activity or enter new activity name: " "$(ls $PROJECTS/$PROJECT) new"
+            if [ "$ANS" = "new" ]; then
+                show "Enter new activity name: "
+            fi
+            if [ -z "$ANS" ]; then
+                show "No change..."
+                return
+            fi
+            ACTIVITY=$(parseSpaces "$ANS")
+        ;;
+        *)
+        show "No such alternative, try agian"
+        ;;
+	esac
+
+    updateActiveState "$START" "$ACTIVITY" "$PROJECT"
+
+	show "$(parseUnderscores $ACTIVITY)@$(parseUnderscores $PROJECT) started at $(date --date="@$START")"
 }
 
 ################
@@ -397,7 +474,7 @@ main()
 	PROJECTS="$CLIENTS/$CLIENT"
 
 	while true; do
-		show "$CLIENT: What do you want to do?" "start stop status summarize help switch quit"
+		show "$CLIENT: What do you want to do?" "start stop edit status summarize help switch quit"
 		CHOICE="$ANS"
     	case "$CHOICE" in
         	"start")
@@ -423,6 +500,9 @@ main()
             	main
             	exit
             	;;
+            "edit")
+                editRunning
+                ;;
         	"quit")
             	exit
             	;;
