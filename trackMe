@@ -326,7 +326,7 @@ editRunning()
             fi
         ;;
         "Activity")
-            ANS=$(show "Enter new project name: " "$(ls $PROJECTS/$PROJECT)")
+            ANS=$(show "Enter new project name: " "$ACTIVITY $(ls $PROJECTS/$PROJECT)")
             if [ -z "$ANS" ]; then
                 show "No change..."
                 return
