@@ -348,7 +348,7 @@ editRunning()
             fi
         ;;
         "Activity")
-            show "Choose existing activity or enter new activity name: " "$(ls $PROJECTS/$PROJECT) new"
+            show "Choose existing activity or enter new activity name: " "$ACTIVITY $(ls $PROJECTS/$PROJECT) new"
             if [ "$ANS" = "new" ]; then
                 show "Enter new activity name: "
             fi
