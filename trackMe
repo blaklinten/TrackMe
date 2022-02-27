@@ -103,29 +103,33 @@ chooseClient()
 {
 	SCRIPT=$1
 
-	ANS="$(show "Choose an existing client, create a (n)ew or (q)uit:" "$(ls $CLIENTS)")"
+	ANS="$(show "Choose an existing client, create a (n)ew, (s)ummarize by time or (q)uit:" "$(ls $CLIENTS)")"
 	CHOICE="$(parseSpaces "$ANS")"
 
 	case "$CHOICE" in
-    	"q")
-        	show "Exiting..."
-        	pkill trackMe
-        	exit
+        "q")
+            show "Exiting..."
+            pkill trackMe
+            exit
+        ;;
+        "n")
+            createClient
+            return
        ;;
-    	"n")
-        	createClient 
-        	return
+       "s")
+            TIME="$(show "Sum entries from when? (leave empty for 12h)")"
+            sumEntries "$TIME"
        ;;
-    	*)
-        	pushd "$CLIENTS" > /dev/zero
-        	for CLIENT in *; do
-            	if [[ "$CLIENT" == "$CHOICE" ]]; then
-                	popd > /dev/zero
-                	return
-            	fi
-        	done
-            	show "Client \"$CHOICE\" does not exist, try again or create it (n)."
-            	chooseClient "$SCRIPT"
+       *)
+            pushd "$CLIENTS" > /dev/zero
+            for CLIENT in *; do
+                if [[ "$CLIENT" == "$CHOICE" ]]; then
+                    popd > /dev/zero
+                    return
+                fi
+            done
+                show "Client \"$CHOICE\" does not exist, try again or create it (n)."
+                chooseClient "$SCRIPT"
        ;;
 	esac
 }
@@ -359,57 +363,111 @@ diff()
 
 sum()
 {
-	ACTIVITY="$1"
-    for LINE in $(sed -n '0~3p' "$ACTIVITY"); do
-        if [[ ! "$LINE" == "Duration:" ]]; then
-        	NEXT_H="$(echo "$LINE" | sed -n -e 's/^\(.*\):\(.*\):\(.*\)/\1/p')"
-            NEXT_M="$(echo "$LINE" | sed -n -e 's/^\(.*\):\(.*\):\(.*\)/\2/p')"
-            NEXT_S="$(echo "$LINE" | sed -n -e 's/^\(.*\):\(.*\):\(.*\)/\3/p')"
-            let "HOURS = $HOURS + 10#$NEXT_H"
-            let "MINUTES = $MINUTES + 10#$NEXT_M"
-            let "SEC = $SEC + 10#$NEXT_S"
-        fi
-    done
+    DURATION="$1"
 
-	let "HOURS = $HOURS + ($MINUTES + $SEC / 60) / 60"
+    NEXT_H="$(sed -n -e 's/^\(.*\):\(.*\):\(.*\)/\1/p' <<<"$DURATION")"
+    NEXT_M="$(sed -n -e 's/^\(.*\):\(.*\):\(.*\)/\2/p' <<<"$DURATION")"
+    NEXT_S="$(sed -n -e 's/^\(.*\):\(.*\):\(.*\)/\3/p' <<<"$DURATION")"
+    let "HOURS = $HOURS + 10#$NEXT_H"
+    let "MINUTES = $MINUTES + 10#$NEXT_M"
+    let "SEC = $SEC + 10#$NEXT_S"
+}
+
+extractAndSumEntries()
+{
+    LIMIT="$1"
+    local COUNT=1
+
+    while IFS= read -r line || [ -n "$line" ]; do
+        case "$COUNT" in
+            "1")
+                local CLIENT="$line"
+                ;;
+            "2")
+                local PROJECT="$line"
+                ;;
+            "3")
+                local ACTIVITY="$line"
+                ;;
+            "4")
+                local START_TIME="$line"
+                START_TIME_SEC="$(date --date "$(cut -d' ' -f1,2 --complement <<<"$line")" +%s)"
+
+                if [[ "$START_TIME_SEC" < "$LIMIT" ]]; then
+                    break;
+                fi
+                ;;
+            "5")
+                # Not used at the moment
+                #local END_TIME="$line"
+                ;;
+            "6")
+                local DURATION="$line"
+                sum "$(cut -d' ' -f2 <<<"$DURATION")" #"$START_TIME" "$ACTIVITY" "$PROJECT" "$CLIENT"
+                COUNT=0
+                ;;
+            *)
+                printf '%s%s\n' "COUNT has invalid value: " "$COUNT"
+                ;;
+        esac
+        COUNT=$((COUNT+1))
+    done < <(tac "$EVENT_FILE")
+}
+
+sumEntries()
+{
+    if [[ -z "$1" ]]; then
+        NOW="$(date +%s)"
+        TWELVE_HOURS="$((3600*12))"
+        LIMIT="$((NOW - TWELVE_HOURS))"
+    else
+        LIMIT="$(date --date "$1" +%s)"
+    fi
+
+    local HOURS=0
+    local MINUTES=0
+    local SEC=0
+
+    extractAndSumEntries "$LIMIT"
+
+    let "HOURS = $HOURS + ($MINUTES + $SEC / 60) / 60"
 	let "MINUTES = ($MINUTES + $SEC / 60) % 60"
 	let "SEC = $SEC % 60"
-
+	show "Total time = $HOURS:$MINUTES:$SEC"
 }
+
 
 sumActivity()
 {
 	ACTIVITY="$1"
 
-	HOURS=0
-	MINUTES=0
-	SEC=0
-
-	sum "$ACTIVITY"
-
-	show "Total time = $HOURS:$MINUTES:$SEC"
+    for DURATION in $(sed -n '0~3p' "$ACTIVITY" | cut -d' ' -f2); do
+	    sum "$DURATION"
+    done
 }
 
 sumProject()
 {
 	PROJECT="$1"
 
-	HOURS=0
-	MINUTES=0
-	SEC=0
-
 	for ACTIVITY in $(ls "$PROJECT"); do
-		sum "$PROJECT/$ACTIVITY"
+		sumActivity "$PROJECT/$ACTIVITY"
 	done
 
-	show "Total time = $HOURS:$MINUTES:$SEC"
+	let "HOURS = $HOURS + ($MINUTES + $SEC / 60) / 60"
+	let "MINUTES = ($MINUTES + $SEC / 60) % 60"
+	let "SEC = $SEC % 60"
 }
 
 summarize()
 {
 	PROJECT="$1"
 
-	ANS="$(show "Choose one activity (a)ll or (q)uit" "$(ls $PROJECTS/$PROJECT)")"
+	local HOURS=0
+	local MINUTES=0
+	local SEC=0
+
+	ANS="$(show "Choose one activity, (a)ll activities or time or (q)uit" "$(ls $PROJECTS/$PROJECT)")"
 	CHOICE="$(parseSpaces "$ANS")"
 
 	case "$CHOICE" in 
@@ -418,12 +476,17 @@ summarize()
     	;;
     	"a")
         	sumProject "$PROJECTS/$PROJECT"
+	        show "Total time = $HOURS:$MINUTES:$SEC"
     	;;
     	*)
         	pushd "$PROJECTS/$PROJECT" > /dev/null
         	for ACTIVITY in *; do
             	if [[ "$CHOICE" == "$ACTIVITY" ]]; then
                 	sumActivity "$PROJECTS/$PROJECT/$CHOICE"
+	                let "HOURS = $HOURS + ($MINUTES + $SEC / 60) / 60"
+	                let "MINUTES = ($MINUTES + $SEC / 60) % 60"
+	                let "SEC = $SEC % 60"
+	                show "Total time = $HOURS:$MINUTES:$SEC"
                 	popd > /dev/null
                 	return
             	fi
@@ -441,7 +504,11 @@ summarize()
 main()
 {
 	if [[ ! -f "$ACTIVE" ]]; then
-		chooseClient
+		ANS=$(chooseClient)
+		if [[ -z "$ANS" ]]; then
+            main
+            exit
+        fi
 	else
     	CLIENT=$(head -n 1 "$ACTIVE")
     	show "Client $(parseUnderscores "$CLIENT") is running a timer."
