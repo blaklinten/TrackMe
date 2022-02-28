@@ -504,7 +504,7 @@ summarize()
 main()
 {
 	if [[ ! -f "$ACTIVE" ]]; then
-		ANS=$(chooseClient)
+		chooseClient
 		if [[ -z "$ANS" ]]; then
             main
             exit
