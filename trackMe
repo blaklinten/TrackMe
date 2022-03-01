@@ -105,7 +105,7 @@ chooseClient()
 {
 	SCRIPT=$1
 
-	ANS="$(show "Choose an existing client, create a (n)ew, (s)ummarize by time or (q)uit:" "$(ls $CLIENTS)")"
+	ANS="$(show "Choose an existing client, create a new, summarize by time or quit:" "new summarize $(ls $CLIENTS) quit")"
 	CHOICE="$(parseSpaces "$ANS")"
 
 	case "$CHOICE" in
@@ -530,27 +530,36 @@ main()
             	fi
             	;;
         	"summarize")
-            	chooseProject "summarize"
-            	;;
+                ANS="$(show "Sum by time or project?" "time project")"
+                case "$ANS" in
+                    "time")
+                        TIME="$(show "Sum entries from when? (leave empty for 12h)")"
+                        sumEntries "$TIME"
+                    ;;
+                    "project")
+                        chooseProject "summarize"
+                    ;;
+                esac
+            ;;
         	"stop")
             	stopActivity
-            	;;
+            ;;
         	"status")
             	showStatus
-            	;;
+            ;;
         	"help")
             	show "TrackMe - A time tracking program" "Usage: trackme [option] Options: start        - start a timer stop         - stop a running timer, if one exists. status       - check status of running timer, if any. summarize    - summarize time for a specified project and/or activity "
-            	;;
+            ;;
         	"switch")
             	main
             	exit
-            	;;
+            ;;
             "edit")
                 editRunning
-                ;;
+            ;;
         	"quit")
             	exit
-            	;;
+            ;;
     	esac
 	done
 }
