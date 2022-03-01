@@ -211,7 +211,7 @@ startActivity()
 	PROJECT="$1"
 
 	if [[ "$GITSYNC" == "yes" ]]; then
-    	gitPull & disown
+    	gitPull
 	fi
 
 	show "What are you doing?" "$(ls $PROJECTS/$PROJECT) new quit"
@@ -225,7 +225,7 @@ startActivity()
         	show "Enter name of new activity:"
 
 	        if [[ "$GITSYNC" == "yes" ]]; then
-    	        gitAdd "$CLIENT/$PROJECT/$(parseSpaces "$ANS")" & disown
+    	        gitAdd "$CLIENT/$PROJECT/$(parseSpaces "$ANS")"
 	        fi
        ;;
 	esac
@@ -274,7 +274,7 @@ saveActivity()
     echo "Duration: $(diff "$START" "$END")" >> "$PROJECTS/$PROJECT/$ACTIVITY"
 
     if [[ "$GITSYNC" == "yes" ]]; then
-        gitAdd "$CLIENT/$PROJECT/$ACTIVITY" & disown
+        gitAdd "$CLIENT/$PROJECT/$ACTIVITY"
     fi
 }
 
@@ -295,7 +295,7 @@ stopActivity()
     rm "$ACTIVE"
 
     if [[ "$GITSYNC" == "yes" ]]; then
-        gitPush "$ACTIVITY" "$PROJECT" & disown
+        gitPush "$ACTIVITY" "$PROJECT"
     fi
 
     show "Time entry added to $(parseUnderscores "$ACTIVITY")!"
