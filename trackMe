@@ -224,9 +224,6 @@ startActivity()
     	"new")
         	show "Enter name of new activity:"
 
-	        if [[ "$GITSYNC" == "yes" ]]; then
-    	        gitAdd "$CLIENT/$PROJECT/$(parseSpaces "$ANS")"
-	        fi
        ;;
 	esac
 	ACTIVITY=$(parseSpaces "$ANS")
