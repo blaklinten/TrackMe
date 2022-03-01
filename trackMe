@@ -121,6 +121,7 @@ chooseClient()
        "s")
             TIME="$(show "Sum entries from when? (leave empty for 12h)")"
             sumEntries "$TIME"
+            return
        ;;
        *)
             pushd "$CLIENTS" > /dev/zero
@@ -507,7 +508,7 @@ main()
 {
 	if [[ ! -f "$ACTIVE" ]]; then
 		chooseClient
-		if [[ -z "$ANS" ]]; then
+		if [[ "$ANS" == "s" ]]; then
             main
             exit
         fi
