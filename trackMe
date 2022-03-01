@@ -18,6 +18,8 @@ export CLIENTS="$HOME/.trackme"
 export ACTIVE="$CLIENTS/active"
 export EVENT_FILE="$CLIENTS/events"
 
+export DATE_FORMAT='+%a %b %e %Y %H:%M:%S %Z'
+
 if [[ ! -d "$CLIENTS" ]]; then
     mkdir -p "$CLIENTS"
     echo "Creating working env..."
@@ -78,7 +80,7 @@ showStatus()
     START=$(tail -n 1 "$ACTIVE")
     END=$(date +%s)
 
-    show "Timer running for $(parseUnderscores $ACTIVITY) on $PROJECT Started at $(date --date="@$START"). Running for $(diff "$START" "$END")."
+    show "Timer running for $(parseUnderscores $ACTIVITY) on $PROJECT Started at $(date "$DATE_FORMAT" --date="@$START"). Running for $(diff "$START" "$END")."
 }
 
 #######################
@@ -223,7 +225,7 @@ startActivity()
 	echo "$PROJECT" >> "$ACTIVE"
 	echo "$START" >> "$ACTIVE"
 
-	show "$(parseUnderscores $ACTIVITY)@$(parseUnderscores $PROJECT) started at $(date --date="@$START")"
+	show "$(parseUnderscores $ACTIVITY)@$(parseUnderscores $PROJECT) started at $(date "$DATE_FORMAT" --date="@$START")"
 }
 
 createAndSaveStopEvent()
@@ -234,8 +236,8 @@ createAndSaveStopEvent()
     PROJECT="$4"
 
     echo "Duration: $(diff "$START" "$END")" >> "$EVENT_FILE"
-    echo "Ended at $(date --date="@$END")" >> "$EVENT_FILE"
-    echo "Started at $(date --date="@$START")" >> "$EVENT_FILE"
+    echo "Ended at $(date "$DATE_FORMAT" --date="@$END")" >> "$EVENT_FILE"
+    echo "Started at $(date "$DATE_FORMAT" --date="@$START")" >> "$EVENT_FILE"
     echo "Activity: $ACTIVITY" >> "$EVENT_FILE"
     echo "Project: $PROJECT" >> "$EVENT_FILE"
     echo "Client: $CLIENT" >> "$EVENT_FILE"
@@ -248,8 +250,8 @@ saveActivity()
     ACTIVITY="$3"
     PROJECT="$4"
 
-    echo "Started at $(date --date="@$START")" >> "$PROJECTS/$PROJECT/$ACTIVITY"
-    echo "Ended at $(date --date="@$END")" >> "$PROJECTS/$PROJECT/$ACTIVITY"
+    echo "Started at $(date "$DATE_FORMAT" --date="@$START")" >> "$PROJECTS/$PROJECT/$ACTIVITY"
+    echo "Ended at $(date "$DATE_FORMAT" --date="@$END")" >> "$PROJECTS/$PROJECT/$ACTIVITY"
     echo "Duration: $(diff "$START" "$END")" >> "$PROJECTS/$PROJECT/$ACTIVITY"
 
     if [[ "$GITSYNC" == "yes" ]]; then
@@ -314,7 +316,7 @@ editRunning()
                 show "No change..."
                 return
             fi
-            START=$(date --date $ANS +%s)
+            START=$(date "$DATE_FORMAT" --date $ANS +%s)
         ;;
         "Project")
             ANS=$(show "Enter new project name: " "$(ls $PROJECTS)")
@@ -344,7 +346,7 @@ editRunning()
 
     updateActiveState "$START" "$ACTIVITY" "$PROJECT"
 
-	show "$(parseUnderscores $ACTIVITY)@$(parseUnderscores $PROJECT) started at $(date --date="@$START")"
+	show "$(parseUnderscores $ACTIVITY)@$(parseUnderscores $PROJECT) started at $(date "$DATE_FORMAT" --date="@$START")"
 }
 
 ################
