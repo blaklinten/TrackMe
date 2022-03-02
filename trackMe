@@ -109,16 +109,16 @@ chooseClient()
 	CHOICE="$(parseSpaces "$ANS")"
 
 	case "$CHOICE" in
-        "q")
+        "quit")
             show "Exiting..."
             pkill trackMe
             exit
         ;;
-        "n")
+        "new")
             createClient
             return
        ;;
-       "s")
+       "summarize")
             TIME="$(show "Sum entries from when? (leave empty for 12h)")"
             sumEntries "$TIME"
             return
@@ -508,7 +508,7 @@ main()
 {
 	if [[ ! -f "$ACTIVE" ]]; then
 		chooseClient
-		if [[ "$ANS" == "s" ]]; then
+		if [[ "$ANS" == "summarize" ]]; then
             main
             exit
         fi
