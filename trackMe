@@ -32,7 +32,13 @@ fi
 gitPull()
 {
 	pushd "$CLIENTS" &> /dev/null
+	show "Git: Pulling..." &
 	git pull &> /dev/null
+	if [[ "$?" != "0" ]]; then
+        show "Git: Pull succeeded!"
+    else
+        show "Git: Pull failed..."
+    fi
 	popd &> /dev/null
 }
 
@@ -42,8 +48,14 @@ gitPush()
 	PROJECT="$2"
 
 	pushd "$CLIENTS" &> /dev/null
+	show "Git: Pushing $ACTIVITY, $PROJECT..." &
 	git commit -am "Time entry for $ACTIVITY, $PROJECT" &> /dev/null
 	git push &> /dev/null
+	if [[ "$?" != "0" ]]; then
+        show "Git: Push succeeded!"
+    else
+        show "Git: Push failed..."
+    fi
 	popd &> /dev/null
 }
 
