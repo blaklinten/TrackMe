@@ -445,6 +445,12 @@ sumEntries()
 
     extractAndSumEntries "$LIMIT"
 
+	if [[ -f "$ACTIVE" ]]; then
+        START=$(tail -n 1 "$ACTIVE")
+        NOW=$(date +%s)
+        sum "$(diff $START $NOW)"
+    fi
+
     let "HOURS = $HOURS + ($MINUTES + $SEC / 60) / 60"
 	let "MINUTES = ($MINUTES + $SEC / 60) % 60"
 	let "SEC = $SEC % 60"
