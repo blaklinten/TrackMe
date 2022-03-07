@@ -329,7 +329,7 @@ editRunning()
                 show "No change..."
                 return
             fi
-            START=$(date "$DATE_FORMAT" --date $ANS +%s)
+            START=$(date --date $ANS +%s)
         ;;
         "Project")
             ANS=$(show "Enter new project name: " "$(ls $PROJECTS)")
