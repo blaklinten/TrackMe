@@ -2,29 +2,39 @@
 
 # Source helper functions
 for FUNCTION in helpers/*; do
+    echo "Importing helper functions in $FUNCTION..."
     . $FUNCTION
 done
 
-# Statistics variables
 
+# Source script to test
+. "$UNIT_UNDER_TEST"
+
+# Statistics variables
 ERRORS=0
 PASSED=0
 
 # Run tests
-
+printf '\n\n%s\n' "Running tests:"
 for TEST in tests/*; do
-    printf '%s\n.\n.\n.\n.\n' "Running test \"${TEST#*/}\":"
+    printf '%s\n.\n.\n.\n.\n' "-> \"${TEST#*/}\":"
 
     . $TEST
 
     if [ "$?" = 0 ]; then
         PASSED=$((PASSED + 1))
-        printf '.\n.\n.\n.\n.\n%s' "Test \"$TEST\" has passed!"
+        printf '.\n.\n.\n.\n.\n\e[32m%s\e[0m\n\n' "Test \"$TEST\" has passed!"
     else
         ERRORS=$((ERRORS + 1))
-        printf '.\n.\n.\n.\n.\n%s' "Test \"$TEST\" has failed..."
+        printf '.\n.\n.\n.\n.\n\e[31m%s\e[0m\n\n' "Test \"$TEST\" has failed..."
     fi
 done
 
 # Summary
-printf '%s tests was run, %s succeeded and %s failed' "$(wc -l <(ls ./tests/) | cut -d' ' -f1)" "$PASSED" "$ERRORS"
+[ "$ERRORS" -gt 0 ] && {
+    printf '\e[31m%s tests was run, %s succeeded and %s failed\e[0m\n' "$(wc -l <(ls ./tests/) | cut -d' ' -f1)" "$PASSED" "$ERRORS"
+} || {
+    printf '\e[32m%s tests was run, %s succeeded and %s failed\e[0m\n' "$(wc -l <(ls ./tests/) | cut -d' ' -f1)" "$PASSED" "$ERRORS"
+}
+
+clean_up
