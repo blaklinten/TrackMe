@@ -101,12 +101,12 @@ showStatus()
 
 parseSpaces()
 {
-    echo "$(echo $@ | sed s/\ /\_/g)"
+    echo "$(echo "$@" | sed s/\ /\_/g)"
 }
 
 parseUnderscores()
 {
-    echo "$(echo $@ | sed s/\_/\ /g)"
+    echo "$(echo "$@" | sed s/\_/\ /g)"
 }
 
 ###############################
