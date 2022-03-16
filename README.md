@@ -7,3 +7,8 @@ A time tracker with both CLI and DMenu interfaces
 
 # Setup
 Weather you want to use Git or not, you must create "~/.trackme" where your data will live.
+
+# Testing
+There is a collection of tests in the `./test/tests`-folder.
+
+Run `./test_runner.sh` to execute all tests.
