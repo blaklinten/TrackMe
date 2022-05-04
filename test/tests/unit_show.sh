@@ -4,7 +4,7 @@ INFO="Testing if show-function works"
 CHOICE="showing"
 CHOICES="$CHOICE $CHOICE $CHOICE"
 
-echo "Calling show with INFO=\""$INFO"\" and CHOICES=\""$CHOICES"\""
+echo "Calling show with INFO=\"$INFO\" and CHOICES=\"$CHOICES\""
 
 show_orig "$INFO" "$CHOICES"
 
