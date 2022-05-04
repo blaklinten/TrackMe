@@ -2,8 +2,9 @@
 
 # Source main script to test
 UNIT_UNDER_TEST="/tmp/trackMe"
-TRACKME_IO="/tmp/trackMeIO"
+export TRACKME_IO="/tmp/trackMeIO"
 
+# shellcheck disable=SC2016
 sed -e 's/^main$//' \
     -e 's/show()/show_orig()/' \
     -e 's/show "Git: Pulling..." &/show "Git: Pulling..."/' \
@@ -14,6 +15,8 @@ sed -e 's/^main$//' \
     "../trackMe" > "$UNIT_UNDER_TEST"
 
 # Adding testing show-function
+# shellcheck disable=SC2016
+# shellcheck disable=SC2028
 echo 'show()
     {
 	    INFO="$1"

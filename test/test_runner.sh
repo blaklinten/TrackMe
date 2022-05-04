@@ -3,11 +3,13 @@
 # Source helper functions
 for FUNCTION in helpers/*; do
     echo "Importing helper functions in $FUNCTION..."
-    . $FUNCTION
+    # shellcheck source=/dev/null
+    . "$FUNCTION"
 done
 
 
 # Source script to test
+# shellcheck source=/dev/null
 . "$UNIT_UNDER_TEST"
 
 # Statistics variables
@@ -19,9 +21,9 @@ printf '\n\n%s\n' "Running tests:"
 for TEST in tests/*; do
     printf '%s\n.\n.\n.\n.\n' "-> \"${TEST#*/}\":"
 
-    . $TEST
+    # shellcheck source=/dev/null
 
-    if [ "$?" = 0 ]; then
+    if . "$TEST"; then
         PASSED=$((PASSED + 1))
         printf '.\n.\n.\n.\n.\n\e[32m%s\e[0m\n\n' "Test \"$TEST\" has passed!"
     else
@@ -31,10 +33,10 @@ for TEST in tests/*; do
 done
 
 # Summary
-[ "$ERRORS" -gt 0 ] && {
+if [ "$ERRORS" -gt 0 ]; then 
     printf '\e[31m%s tests was run, %s succeeded and %s failed\e[0m\n' "$(wc -l <(ls ./tests/) | cut -d' ' -f1)" "$PASSED" "$ERRORS"
-} || {
+else 
     printf '\e[32m%s tests was run, %s succeeded and %s failed\e[0m\n' "$(wc -l <(ls ./tests/) | cut -d' ' -f1)" "$PASSED" "$ERRORS"
-}
+fi
 
 clean_up
