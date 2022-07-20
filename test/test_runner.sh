@@ -8,7 +8,9 @@ for FUNCTION in helpers/*; do
 done
 
 
-# Source script to test
+# Create script to test from original trackMe script
+create_safe_trackMe
+
 # shellcheck source=/dev/null
 . "$UNIT_UNDER_TEST"
 
