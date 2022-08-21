@@ -24,10 +24,10 @@ for TEST in tests/*; do
     # shellcheck source=/dev/null
 
     if . "$TEST"; then
-        PASSED=$((PASSED + 1))
+        ((PASSED = PASSED + 1))
         printf '.\n.\n.\n.\n.\n\e[32m%s\e[0m\n\n' "Test \"$TEST\" has passed!"
     else
-        ERRORS=$((ERRORS + 1))
+        ((ERRORS = ERRORS + 1))
         printf '.\n.\n.\n.\n.\n\e[31m%s\e[0m\n\n' "Test \"$TEST\" has failed..."
     fi
 done
