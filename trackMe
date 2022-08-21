@@ -31,7 +31,7 @@ fi
 
 gitPull()
 {
-	pushd "$CLIENTS" &> /dev/null
+	pushd "$CLIENTS" &> /dev/null || exit
 	show "Git: Pulling..." &
 	git pull &> /dev/null
 	if [[ "$?" == "0" ]]; then
@@ -39,7 +39,7 @@ gitPull()
     else
         show "Git: Pull failed..."
     fi
-	popd &> /dev/null
+	popd &> /dev/null || exit
 }
 
 gitPush()
@@ -47,7 +47,7 @@ gitPush()
 	ACTIVITY="$1"
 	PROJECT="$2"
 
-	pushd "$CLIENTS" &> /dev/null
+	pushd "$CLIENTS" &> /dev/null || exit
 	show "Git: Pushing $ACTIVITY, $PROJECT..." &
 	git commit -am "Time entry for $ACTIVITY, $PROJECT" &> /dev/null
 	git push &> /dev/null
@@ -56,16 +56,16 @@ gitPush()
     else
         show "Git: Push failed..."
     fi
-	popd &> /dev/null
+	popd &> /dev/null || exit
 }
 
 gitAdd()
 {
     NEW_ACTIVITY="$1"
 
-	pushd "$CLIENTS" &> /dev/null
+	pushd "$CLIENTS" &> /dev/null || exit
 	git add "$NEW_ACTIVITY" &> /dev/null
-	popd &> /dev/null
+	popd &> /dev/null || exit
 
 }
 
@@ -101,12 +101,12 @@ showStatus()
 
 parseSpaces()
 {
-    echo "$(echo "$@" | sed s/\ /\_/g)"
+    echo "$@" | sed s/\ /\_/g
 }
 
 parseUnderscores()
 {
-    echo "$(echo "$@" | sed s/\_/\ /g)"
+    echo "$@" | sed s/\_/\ /g
 }
 
 ###############################
@@ -136,10 +136,10 @@ chooseClient()
             return
        ;;
        *)
-            pushd "$CLIENTS" > /dev/zero
+            pushd "$CLIENTS" > /dev/zero || exit
             for CLIENT in *; do
                 if [[ "$CLIENT" == "$CHOICE" ]]; then
-                    popd > /dev/zero
+                    popd > /dev/zero || exit
                     return
                 fi
             done
@@ -163,11 +163,11 @@ chooseProject()
         	createProject "$SCRIPT"
         ;;
     	*)
-        	pushd "$PROJECTS" > /dev/zero
+        	pushd "$PROJECTS" > /dev/zero || exit
         	for PROJECT in *; do
             	if [[ "$PROJECT" == "$CHOICE" ]]; then
                 	"$SCRIPT" "$CHOICE"
-                	popd > /dev/zero
+                	popd > /dev/zero || exit
                 	return
             	fi
         	done
@@ -233,92 +233,90 @@ startActivity()
 
 	START=$(date +%s)
 
-	echo "$CLIENT" >> "$ACTIVE"
-	echo "$ACTIVITY" >> "$ACTIVE"
-	echo "$PROJECT" >> "$ACTIVE"
-	echo "$START" >> "$ACTIVE"
+  printf '%s\n%s\n%s\n%s\n' "$CLIENT" "$ACTIVITY" "$PROJECT" "$START" >> "$ACTIVE"
 
 	show "$(parseUnderscores $ACTIVITY)@$(parseUnderscores $PROJECT) started at $(date "$DATE_FORMAT" --date="@$START")"
 }
 
 createAndSaveStopEvent()
 {
-    START="$1"
-    END="$2"
-    ACTIVITY="$3"
-    PROJECT="$4"
+  START="$1"
+  END="$2"
+  ACTIVITY="$3"
+  PROJECT="$4"
 
-    echo "Duration: $(diff "$START" "$END")" >> "$EVENT_FILE"
-    echo "Ended at $(date "$DATE_FORMAT" --date="@$END")" >> "$EVENT_FILE"
-    echo "Started at $(date "$DATE_FORMAT" --date="@$START")" >> "$EVENT_FILE"
-    echo "Activity: $ACTIVITY" >> "$EVENT_FILE"
-    echo "Project: $PROJECT" >> "$EVENT_FILE"
-    echo "Client: $CLIENT" >> "$EVENT_FILE"
+  DURATION="Duration: $(diff "$START" "$END")"
+  ENDED="Ended at $(date "$DATE_FORMAT" --date="@$END")"
+  STARTED="Started at $(date "$DATE_FORMAT" --date="@$START")"
+  ACTIVITY="Activity: $ACTIVITY"
+  PROJECT="Project: $PROJECT"
+  CLIENT="Client: $CLIENT"
+
+  printf '%s\n%s\n%s\n%s\n%s\n%s\n' "$DURATION" "$ENDED" "$STARTED" "$ACTIVITY" "$PROJECT" "$CLIENT" >> "$EVENT_FILE"
 }
 
 saveActivity()
 {
-    START="$1"
-    END="$2"
-    ACTIVITY="$3"
-    PROJECT="$4"
+  START="$1"
+  END="$2"
+  ACTIVITY="$3"
+  PROJECT="$4"
 
-    echo "Started at $(date "$DATE_FORMAT" --date="@$START")" >> "$PROJECTS/$PROJECT/$ACTIVITY"
-    echo "Ended at $(date "$DATE_FORMAT" --date="@$END")" >> "$PROJECTS/$PROJECT/$ACTIVITY"
-    echo "Duration: $(diff "$START" "$END")" >> "$PROJECTS/$PROJECT/$ACTIVITY"
+  STARTED="Started at $(date "$DATE_FORMAT" --date="@$START")"
+  ENDED="Ended at $(date "$DATE_FORMAT" --date="@$END")"
+  DURATION="Duration: $(diff "$START" "$END")"
 
-    if [[ "$GITSYNC" == "yes" ]]; then
-        gitAdd "$CLIENT/$PROJECT/$ACTIVITY"
-    fi
+  printf '%s\n%s\n%s\n' "$STARTED" "$ENDED" "$DURATION" >> "$PROJECTS/$PROJECT/$ACTIVITY"
+
+  if [[ "$GITSYNC" == "yes" ]]; then
+      gitAdd "$CLIENT/$PROJECT/$ACTIVITY"
+  fi
 }
 
 stopActivity()
 {
-    if [ ! -f "$ACTIVE" ]; then
-        show "No timer active, start one?"
-        return
-    fi
+  if [ ! -f "$ACTIVE" ]; then
+      show "No timer active, start one?"
+      return
+  fi
 
-    START=$(tail -n 1 "$ACTIVE")
-    END=$(date +%s)
-    ACTIVITY=$(tail -n 3 "$ACTIVE" | head -n 1)
-    PROJECT=$(tail -n 3 "$ACTIVE" | head -n 2 | tail -n 1)
+  START=$(tail -n 1 "$ACTIVE")
+  END=$(date +%s)
+  ACTIVITY=$(tail -n 3 "$ACTIVE" | head -n 1)
+  PROJECT=$(tail -n 3 "$ACTIVE" | head -n 2 | tail -n 1)
 
-    saveActivity "$START" "$END" "$ACTIVITY" "$PROJECT"
-    createAndSaveStopEvent "$START" "$END" "$ACTIVITY" "$PROJECT"
-    rm "$ACTIVE"
+  saveActivity "$START" "$END" "$ACTIVITY" "$PROJECT"
+  createAndSaveStopEvent "$START" "$END" "$ACTIVITY" "$PROJECT"
+  rm "$ACTIVE"
 
-    if [[ "$GITSYNC" == "yes" ]]; then
-        gitPush "$ACTIVITY" "$PROJECT"
-    fi
+  if [[ "$GITSYNC" == "yes" ]]; then
+      gitPush "$ACTIVITY" "$PROJECT"
+  fi
 
-    show "Time entry added to $(parseUnderscores "$ACTIVITY")!"
+  show "Time entry added to $(parseUnderscores "$ACTIVITY")!"
 }
 
 updateActiveState()
 {
-    START="$1"
-    ACTIVITY="$2"
-    PROJECT="$3"
+  START="$1"
+  ACTIVITY="$2"
+  PROJECT="$3"
 
-    rm "$ACTIVE"
+  rm "$ACTIVE"
 
-	echo "$CLIENT" >> "$ACTIVE"
-	echo "$ACTIVITY" >> "$ACTIVE"
-	echo "$PROJECT" >> "$ACTIVE"
-	echo "$START" >> "$ACTIVE"
+  printf '%s\n%s\n%s\n%s\n' "$CLIENT" "$ACTIVITY" "$PROJECT" "$START" >> "$ACTIVE"
 }
 
 editRunning()
 {
-    if [ ! -f "$ACTIVE" ]; then
-        show "No timer active, start one?"
-        return
-    fi
+  if [ ! -f "$ACTIVE" ]; then
+      show "No timer active, start one?"
+      return
+  fi
 
-    START=$(tail -n 1 "$ACTIVE")
-    ACTIVITY=$(tail -n 3 "$ACTIVE" | head -n 1)
-    PROJECT=$(tail -n 3 "$ACTIVE" | head -n 2 | tail -n 1)
+  START=$(tail -n 1 "$ACTIVE")
+  ACTIVITY=$(tail -n 3 "$ACTIVE" | head -n 1)
+  PROJECT=$(tail -n 3 "$ACTIVE" | head -n 2 | tail -n 1)
 
 	CHOICE="$(show "Choose what to edit:" "Start Project Activity")"
 
@@ -368,10 +366,10 @@ editRunning()
 
 diff()
 {
-	let "DIFF = $2 - $1"
-	let "SECONDS = DIFF % 60"
-	let "MINUTES = (DIFF % 3600) / 60"
-	let "HOURS = DIFF / 3600"
+  ((DIFF = $2 - $1))
+  ((SECONDS = DIFF % 60))
+  ((MINUTES = (DIFF % 3600) / 60))
+  ((HOURS = DIFF / 3600))
 
 	echo "$HOURS:$MINUTES:$SECONDS"
 }
@@ -383,9 +381,9 @@ sum()
     NEXT_H="$(sed -n -e 's/^\(.*\):\(.*\):\(.*\)/\1/p' <<<"$DURATION")"
     NEXT_M="$(sed -n -e 's/^\(.*\):\(.*\):\(.*\)/\2/p' <<<"$DURATION")"
     NEXT_S="$(sed -n -e 's/^\(.*\):\(.*\):\(.*\)/\3/p' <<<"$DURATION")"
-    let "HOURS = $HOURS + 10#$NEXT_H"
-    let "MINUTES = $MINUTES + 10#$NEXT_M"
-    let "SEC = $SEC + 10#$NEXT_S"
+    ((HOURS = HOURS + 10#$NEXT_H))
+    ((MINUTES = MINUTES + 10#$NEXT_M))
+    ((SEC = SEC + 10#$NEXT_S))
 }
 
 extractAndSumEntries()
@@ -406,7 +404,7 @@ extractAndSumEntries()
                 ;;
             "4")
                 local START_TIME="$line"
-                START_TIME_SEC="$(date --date "$(cut -d' ' -f1,2 --complement <<<"$line")" +%s)"
+                START_TIME_SEC="$(date --date "$(cut -d' ' -f1,2 --complement <<<"$START_TIME")" +%s)"
 
                 if [[ "$START_TIME_SEC" < "$LIMIT" ]]; then
                     break;
@@ -449,11 +447,11 @@ sumEntries()
         START=$(tail -n 1 "$ACTIVE")
         NOW=$(date +%s)
         sum "$(diff $START $NOW)"
-    fi
+  fi
 
-    let "HOURS = $HOURS + ($MINUTES + $SEC / 60) / 60"
-	let "MINUTES = ($MINUTES + $SEC / 60) % 60"
-	let "SEC = $SEC % 60"
+  ((HOURS = HOURS + (MINUTES + SEC / 60) / 60))
+  ((MINUTES = (MINUTES + SEC / 60) % 60))
+  ((SEC = SEC % 60))
 	show "Total time = $HOURS:$MINUTES:$SEC"
 }
 
@@ -475,9 +473,9 @@ sumProject()
 		sumActivity "$PROJECT/$ACTIVITY"
 	done
 
-	let "HOURS = $HOURS + ($MINUTES + $SEC / 60) / 60"
-	let "MINUTES = ($MINUTES + $SEC / 60) % 60"
-	let "SEC = $SEC % 60"
+  ((HOURS = HOURS + (MINUTES + SEC / 60) / 60))
+  ((MINUTES = (MINUTES + SEC / 60) % 60))
+  ((SEC = SEC % 60))
 }
 
 summarize()
@@ -500,15 +498,15 @@ summarize()
 	        show "Total time = $HOURS:$MINUTES:$SEC"
     	;;
     	*)
-        	pushd "$PROJECTS/$PROJECT" > /dev/null
+        	pushd "$PROJECTS/$PROJECT" > /dev/null || exit
         	for ACTIVITY in *; do
             	if [[ "$CHOICE" == "$ACTIVITY" ]]; then
                 	sumActivity "$PROJECTS/$PROJECT/$CHOICE"
-	                let "HOURS = $HOURS + ($MINUTES + $SEC / 60) / 60"
-	                let "MINUTES = ($MINUTES + $SEC / 60) % 60"
-	                let "SEC = $SEC % 60"
+                  ((HOURS = HOURS + (MINUTES + SEC / 60) / 60))
+                  ((MINUTES = (MINUTES + SEC / 60) % 60))
+                  ((SEC = SEC % 60))
 	                show "Total time = $HOURS:$MINUTES:$SEC"
-                	popd > /dev/null
+                	popd > /dev/null || exit
                 	return
             	fi
         	done
