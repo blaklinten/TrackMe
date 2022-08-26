@@ -30,10 +30,13 @@ assert_equals()
 {
     [ -z "$1" ] && return 1
     [ -z "$2" ] && return 1
+
     
     if [ "$1" = "$2" ]; then
+        echo "$1 == $2"
         return 0
     else
+        echo "$1 != $2"
         return 1
     fi
 }
