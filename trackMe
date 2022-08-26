@@ -384,6 +384,10 @@ sum()
     ((HOURS = HOURS + 10#$NEXT_H))
     ((MINUTES = MINUTES + 10#$NEXT_M))
     ((SEC = SEC + 10#$NEXT_S))
+
+    ((HOURS = HOURS + (MINUTES + SEC / 60) / 60))
+    ((MINUTES = (MINUTES + SEC / 60) % 60))
+    ((SEC = SEC % 60))
 }
 
 extractAndSumEntries()
@@ -449,9 +453,6 @@ sumEntries()
         sum "$(diff $START $NOW)"
   fi
 
-  ((HOURS = HOURS + (MINUTES + SEC / 60) / 60))
-  ((MINUTES = (MINUTES + SEC / 60) % 60))
-  ((SEC = SEC % 60))
 	show "Total time = $HOURS:$MINUTES:$SEC"
 }
 
@@ -469,13 +470,9 @@ sumProject()
 {
 	PROJECT="$1"
 
-	for ACTIVITY in $(ls "$PROJECT"); do
+	for ACTIVITY in "$PROJECT"/*; do
 		sumActivity "$PROJECT/$ACTIVITY"
 	done
-
-  ((HOURS = HOURS + (MINUTES + SEC / 60) / 60))
-  ((MINUTES = (MINUTES + SEC / 60) % 60))
-  ((SEC = SEC % 60))
 }
 
 summarize()
@@ -502,9 +499,6 @@ summarize()
         	for ACTIVITY in *; do
             	if [[ "$CHOICE" == "$ACTIVITY" ]]; then
                 	sumActivity "$PROJECTS/$PROJECT/$CHOICE"
-                  ((HOURS = HOURS + (MINUTES + SEC / 60) / 60))
-                  ((MINUTES = (MINUTES + SEC / 60) % 60))
-                  ((SEC = SEC % 60))
 	                show "Total time = $HOURS:$MINUTES:$SEC"
                 	popd > /dev/null || exit
                 	return
