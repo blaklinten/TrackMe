@@ -17,6 +17,7 @@ export WD="$HOME/Git/TrackMe"
 export CLIENTS="$HOME/.trackme"
 export ACTIVE="$CLIENTS/active"
 export EVENT_FILE="$CLIENTS/events"
+export REPORTS="$CLIENTS/reports"
 
 export DATE_FORMAT='+%a %b %e %Y %H:%M:%S %Z'
 
@@ -366,6 +367,11 @@ editRunning()
 
 diff()
 {
+  if [ "$1" -gt "$2" ]; then
+    echo "diff would be negative, this is not allowed! Wrong order of parameters?"
+    return 1
+  fi
+
   ((DIFF = $2 - $1))
   ((SECONDS = DIFF % 60))
   ((MINUTES = (DIFF % 3600) / 60))
@@ -420,7 +426,17 @@ extractAndSumEntries()
                 ;;
             "6")
                 local DURATION="$line"
+                if [ -a "$REPORTS/$CLIENT/$PROJECT/$ACTIVITY" ]; then
+                  OLD_DURATION="$(cat "$REPORTS/$CLIENT/$PROJECT/$ACTIVITY")"
+
+                  HOURS="$(sed -n -e 's/^\(.*\):\(.*\):\(.*\)/\1/p' <<<"$OLD_DURATION")"
+                  MINUTES="$(sed -n -e 's/^\(.*\):\(.*\):\(.*\)/\2/p' <<<"$OLD_DURATION")"
+                  SEC="$(sed -n -e 's/^\(.*\):\(.*\):\(.*\)/\3/p' <<<"$OLD_DURATION")"
+                else 
+                  mkdir -p "$REPORTS/$CLIENT/$PROJECT/$ACTIVITY"
+                fi
                 sum "$(cut -d' ' -f2 <<<"$DURATION")" #"$START_TIME" "$ACTIVITY" "$PROJECT" "$CLIENT"
+                printf '%s\n' "$HOURS:$MINUTES:$SEC" > "$REPORTS/$CLIENT/$PROJECT/$ACTIVITY"
                 COUNT=0
                 ;;
             *)

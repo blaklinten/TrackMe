@@ -12,6 +12,7 @@ sed -e 's/^main$//' \
     -e 's/git push.*/echo push >> \$TRACKME_IO/' \
     -e 's/git add.*/echo "$NEW_ACTIVITY" >> \$TRACKME_IO/' \
     -e 's/| dmenu -i -p "$INFO"/>> \$TRACKME_IO; echo "$INFO" >> \$TRACKME_IO/' \
+    -e 's|export CLIENTS="$HOME/.trackme"|export CLIENTS="/tmp/.trackme"|' \
     "../trackMe" > "$UNIT_UNDER_TEST"
 
 # Adding testing show-function
