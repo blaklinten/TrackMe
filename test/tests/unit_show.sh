@@ -8,4 +8,4 @@ echo "Calling show with INFO=\"$INFO\" and CHOICES=\"$CHOICES\""
 
 show_orig "$INFO" "$CHOICES"
 
-assert_shown "$CHOICE" "3"
+assert_shown "$CHOICE" "3" || return 1
