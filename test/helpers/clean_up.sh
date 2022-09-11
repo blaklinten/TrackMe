@@ -5,6 +5,8 @@ reset_mock_git()
 {
     rm -f "$TRACKME_IO"
     rm -rf /tmp/.trackme/*
+    mkdir /tmp/.trackme/reports
+    touch /tmp/.trackme/events
 }
 
 clean_up()
