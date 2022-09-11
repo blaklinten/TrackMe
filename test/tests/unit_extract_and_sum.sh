@@ -20,6 +20,17 @@ ACTIVITY_TWO="another test"
 PROJECT_TWO="alpha_testing"
 CLIENT_TWO="A-test"
 
+### No entry for the last 12h ###
+#
+createActivity "$THIRTEEN_HOURS_AGO" "$TWO_HOURS_AGO" "$ACTIVITY_ONE" "$PROJECT_ONE" "$CLIENT_ONE"
+
+sumEntries
+
+assert_shown "No_timers_active_for_at_least_12h:\[0:0:0\]" 1 || return 1
+
+# Reset DB
+reset_mock_git
+
 ### A single entry ###
 #
 # A one hour entry
@@ -30,7 +41,6 @@ sumEntries
 
 assert_shown "$PROJECT_ONE:\[1:0:0\]" 1 || return 1
 
-# Reset DB
 reset_mock_git
 
 ### Multiple entries, different client/project/activity ###

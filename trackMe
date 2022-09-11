@@ -18,6 +18,7 @@ export CLIENTS="$HOME/.trackme"
 export ACTIVE="$CLIENTS/active"
 export EVENT_FILE="$CLIENTS/events"
 export REPORTS="$CLIENTS/reports"
+export FINAL_REPORT="$REPORTS/final"
 
 export DATE_FORMAT='+%a %b %e %Y %H:%M:%S %Z'
 
@@ -506,12 +507,16 @@ sumEntries()
 
   fi
 
-  for REPORT in "$REPORTS"/*/*; do
-    TOTAL="$(cat "$REPORT")"
-	  printf '%s:[%s]\n' "${REPORT#/*/*/*/*/*}" "$TOTAL" >> "$REPORTS/final"
-  done
+  if [ "$(find "$REPORTS" -type f | wc -l)" -gt "0" ];then
+    for REPORT in "$REPORTS"/*/*; do
+      TOTAL="$(cat "$REPORT")"
+      printf '%s:[%s]\n' "${REPORT#/*/*/*/*/*}" "$TOTAL" >> "$FINAL_REPORT"
+    done
+  else
+    echo "No timers active for at least 12h:[0:0:0]" > "$FINAL_REPORT"
+  fi
 
-  show "Total time:" "$(cat "$REPORTS"/final)" "vertical-list"
+  show "Total time:" "$(parseSpaces "$(cat "$FINAL_REPORT")")" "vertical-list"
   rm -r "${REPORTS:?}"/*
 }
 
