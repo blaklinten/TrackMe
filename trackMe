@@ -78,7 +78,13 @@ show()
 {
 	INFO="$1"
 	CHOICES="$2"
-	echo "$CHOICES" | sed -e 's/ /\n/g' | dmenu -i -p "$INFO"
+
+  if [ -n "$3" ] && [ "$3" = "vertical-list" ]; then
+    echo "$CHOICES" | sed -e 's/ /\n/g' | dmenu -l 20 -i -p "$INFO"
+  else
+    echo "$CHOICES" | sed -e 's/ /\n/g' | dmenu -i -p "$INFO"
+  fi
+
 }
 
 showStatus()
@@ -404,13 +410,16 @@ extractAndSumEntries()
     while IFS= read -r line || [ -n "$line" ]; do
         case "$COUNT" in
             "1")
-                local CLIENT="$line"
+                local CLIENT_LINE="$line"
+                CLIENT="$(cut -d' ' -f2 <<<"$CLIENT_LINE")"
                 ;;
             "2")
-                local PROJECT="$line"
+                local PROJECT_LINE="$line"
+                PROJECT="$(cut -d' ' -f2 <<<"$PROJECT_LINE")"
                 ;;
             "3")
-                local ACTIVITY="$line"
+                local ACTIVITY_LINE="$line"
+                ACTIVITY="$(cut -d' ' -f2 <<<"$ACTIVITY_LINE")"
                 ;;
             "4")
                 local START_TIME="$line"
@@ -426,17 +435,23 @@ extractAndSumEntries()
                 ;;
             "6")
                 local DURATION="$line"
-                if [ -a "$REPORTS/$CLIENT/$PROJECT/$ACTIVITY" ]; then
-                  OLD_DURATION="$(cat "$REPORTS/$CLIENT/$PROJECT/$ACTIVITY")"
+                if [ -a "$REPORTS/$CLIENT/$PROJECT" ]; then
+                  OLD_DURATION="$(cat "$REPORTS/$CLIENT/$PROJECT")"
 
                   HOURS="$(sed -n -e 's/^\(.*\):\(.*\):\(.*\)/\1/p' <<<"$OLD_DURATION")"
                   MINUTES="$(sed -n -e 's/^\(.*\):\(.*\):\(.*\)/\2/p' <<<"$OLD_DURATION")"
                   SEC="$(sed -n -e 's/^\(.*\):\(.*\):\(.*\)/\3/p' <<<"$OLD_DURATION")"
                 else 
-                  mkdir -p "$REPORTS/$CLIENT/$PROJECT/$ACTIVITY"
+                  HOURS="0"
+                  MINUTES="0"
+                  SEC="0"
+
+                  if [ ! -d "$REPORTS/$CLIENT" ]; then
+                    mkdir -p "$REPORTS/$CLIENT"
+                  fi
                 fi
                 sum "$(cut -d' ' -f2 <<<"$DURATION")" #"$START_TIME" "$ACTIVITY" "$PROJECT" "$CLIENT"
-                printf '%s\n' "$HOURS:$MINUTES:$SEC" > "$REPORTS/$CLIENT/$PROJECT/$ACTIVITY"
+                printf '%s\n' "$HOURS:$MINUTES:$SEC" > "$REPORTS/$CLIENT/$PROJECT"
                 COUNT=0
                 ;;
             *)
@@ -449,27 +464,55 @@ extractAndSumEntries()
 
 sumEntries()
 {
-    if [[ -z "$1" ]]; then
-        NOW="$(date +%s)"
-        TWELVE_HOURS="$((3600*12))"
-        LIMIT="$((NOW - TWELVE_HOURS))"
-    else
-        LIMIT="$(date --date "$1" +%s)"
-    fi
-
-    local HOURS=0
-    local MINUTES=0
-    local SEC=0
-
-    extractAndSumEntries "$LIMIT"
-
-	if [[ -f "$ACTIVE" ]]; then
-        START=$(tail -n 1 "$ACTIVE")
-        NOW=$(date +%s)
-        sum "$(diff $START $NOW)"
+  if [[ -z "$1" ]]; then
+      NOW="$(date +%s)"
+      TWELVE_HOURS="$((3600*12))"
+      LIMIT="$((NOW - TWELVE_HOURS))"
+  else
+      LIMIT="$(date --date "$1" +%s)"
   fi
 
-	show "Total time = $HOURS:$MINUTES:$SEC"
+  local HOURS=0
+  local MINUTES=0
+  local SEC=0
+
+  extractAndSumEntries "$LIMIT"
+
+  if [[ -f "$ACTIVE" ]]; then
+
+      CLIENT=$(head -n 1 "$ACTIVE")
+      PROJECT=$(tail -n 3 "$ACTIVE" | head -n 2 | tail -n 1)
+      START=$(tail -n 1 "$ACTIVE")
+      NOW=$(date +%s)
+      DURATION="$(diff "$START" "$NOW")"
+
+      if [ -a "$REPORTS/$CLIENT/$PROJECT" ]; then
+        OLD_DURATION="$(cat "$REPORTS/$CLIENT/$PROJECT")"
+
+        HOURS="$(sed -n -e 's/^\(.*\):\(.*\):\(.*\)/\1/p' <<<"$OLD_DURATION")"
+        MINUTES="$(sed -n -e 's/^\(.*\):\(.*\):\(.*\)/\2/p' <<<"$OLD_DURATION")"
+        SEC="$(sed -n -e 's/^\(.*\):\(.*\):\(.*\)/\3/p' <<<"$OLD_DURATION")"
+      else 
+        HOURS="0"
+        MINUTES="0"
+        SEC="0"
+
+        if [ ! -d "$REPORTS/$CLIENT" ]; then
+          mkdir -p "$REPORTS/$CLIENT"
+        fi
+      fi
+      sum "$(cut -d' ' -f2 <<<"$DURATION")" #"$START_TIME" "$ACTIVITY" "$PROJECT" "$CLIENT"
+      printf '%s\n' "$HOURS:$MINUTES:$SEC" > "$REPORTS/$CLIENT/$PROJECT"
+
+  fi
+
+  for REPORT in "$REPORTS"/*/*; do
+    TOTAL="$(cat "$REPORT")"
+	  printf '%s:[%s]\n' "${REPORT#/*/*/*/*/*}" "$TOTAL" >> "$REPORTS/final"
+  done
+
+  show "Total time:" "$(cat "$REPORTS"/final)" "vertical-list"
+  rm -r "${REPORTS:?}"/*
 }
 
 
