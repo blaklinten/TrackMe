@@ -11,7 +11,7 @@ sed -e 's/^main$//' \
     -e 's/git pull.*/echo pull >> \$TRACKME_IO/' \
     -e 's/git push.*/echo push >> \$TRACKME_IO/' \
     -e 's/git add.*/echo "$NEW_ACTIVITY" >> \$TRACKME_IO/' \
-    -e 's/| dmenu -i -p "$INFO"/>> \$TRACKME_IO; echo "$INFO" >> \$TRACKME_IO/' \
+    -e 's/printf \"\%s\\n\" \"\$INFO\"/printf "%s\n" "$INFO" >> \$TRACKME_IO; echo "$CHOICES" >> \$TRACKME_IO; return/' \
     "../trackMe" > "$UNIT_UNDER_TEST"
 
 # Adding testing show-function
