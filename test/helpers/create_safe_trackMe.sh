@@ -13,6 +13,8 @@ sed -e 's/^main$//' \
     -e 's/git add.*/echo "$NEW_ACTIVITY" >> \$TRACKME_IO/' \
     -e 's/printf \"\%s\\n\" \"\$INFO\"/printf "%s\n" "$INFO" >> \$TRACKME_IO; echo "$CHOICES" >> \$TRACKME_IO; return/' \
     -e 's|export CLIENTS="$HOME/.trackme"|export CLIENTS="/tmp/.trackme"|' \
+    -e 's/show "Total time = $HOURS:$MINUTES:$SEC"/show "Total time = $HOURS:$MINUTES:$SEC" "C:$CLIENT P:$PROJECT A:$ACTIVITY"/' \
+    -e 's/clear//' \
     "../trackMe" > "$UNIT_UNDER_TEST"
 
 # Adding testing show-function
@@ -22,5 +24,5 @@ echo 'show()
     {
 	    INFO="$1"
 	    CHOICES="$2"
-	    printf "Choices: %s\nInfo: %s\n" "$CHOICES" "$INFO"
+	    printf "Choices: %s\nInfo: %s\n" "$CHOICES" "$INFO" >> $TRACKME_IO
     }' >> "$UNIT_UNDER_TEST"
