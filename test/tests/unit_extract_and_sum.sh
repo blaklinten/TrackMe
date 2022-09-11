@@ -41,6 +41,7 @@ sumEntries
 
 assert_shown "$PROJECT_ONE:\[1:0:0\]" 1 || return 1
 
+# Reset DB
 reset_mock_git
 
 ### Multiple entries, different client/project/activity ###
