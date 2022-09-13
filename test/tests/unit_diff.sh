@@ -13,4 +13,5 @@ echo "Diff is $DIFF"
 
 assert_equals "$DIFF" "4:30:22" || return 1
 
+# Should not be accepted to diff if result is negative
 assert_fail "diff $END_TIME_IN_SEC $START_TIME_IN_SEC" || return 1
