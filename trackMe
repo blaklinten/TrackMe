@@ -253,12 +253,12 @@ createAndSaveStopEvent()
   ACTIVITY="$3"
   PROJECT="$4"
 
-  DURATION="Duration: $(diff "$START" "$END")"
-  ENDED="Ended at $(date "$DATE_FORMAT" --date="@$END")"
-  STARTED="Started at $(date "$DATE_FORMAT" --date="@$START")"
-  ACTIVITY="Activity: $ACTIVITY"
-  PROJECT="Project: $PROJECT"
-  CLIENT="Client: $CLIENT"
+  local -r DURATION="Duration: $(diff "$START" "$END")"
+  local -r ENDED="Ended at $(date "$DATE_FORMAT" --date="@$END")"
+  local -r STARTED="Started at $(date "$DATE_FORMAT" --date="@$START")"
+  local -r ACTIVITY="Activity: $ACTIVITY"
+  local -r PROJECT="Project: $PROJECT"
+  local -r CLIENT="Client: $CLIENT"
 
   printf '%s\n%s\n%s\n%s\n%s\n%s\n' "$DURATION" "$ENDED" "$STARTED" "$ACTIVITY" "$PROJECT" "$CLIENT" >> "$EVENT_FILE"
 }
