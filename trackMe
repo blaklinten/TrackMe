@@ -535,7 +535,7 @@ sumProject()
 	PROJECT="$1"
 
 	for ACTIVITY in "$PROJECT"/*; do
-		sumActivity "$PROJECT/$ACTIVITY"
+		sumActivity "$ACTIVITY"
 	done
 }
 
