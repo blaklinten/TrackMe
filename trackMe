@@ -19,6 +19,7 @@ export ACTIVE="$CLIENTS/active"
 export EVENT_FILE="$CLIENTS/events"
 export REPORTS="$CLIENTS/reports"
 export FINAL_REPORT="$REPORTS/final"
+export DATE_FILE_PATH="$CLIENTS/dates"
 
 export DATE_FORMAT='+%a %b %e %Y %H:%M:%S %Z'
 export DATE_SHORT_FORMAT='+%a %b %e %Y'
@@ -165,8 +166,9 @@ chooseClient()
             return
        ;;
        "summarize")
-            TIME="$(show "Sum entries from when? (leave empty for 12h)")"
-            sumEntries "$TIME"
+            FROM_TIME="$(chooseDate "Sum entries from when? (leave empty for 12h)")"
+            TO_TIME="$(chooseDate "Sum entries to when? (leave empty for now)")"
+            sumEntries "$FROM_TIME" "$TO_TIME"
             return
        ;;
        *)
@@ -431,8 +433,10 @@ sum()
 
 extractAndSumEntries()
 {
-    LIMIT="$1"
+    START_LIMIT="$1"
+    END_LIMIT="$2"
     local COUNT=1
+    local IS_INSIDE_TIME_SPAN="no"
 
     while IFS= read -r line || [ -n "$line" ]; do
         case "$COUNT" in
@@ -452,15 +456,24 @@ extractAndSumEntries()
                 local START_TIME="$line"
                 START_TIME_SEC="$(dateFormatToSeconds "$(cut -d' ' -f1,2 --complement <<<"$START_TIME")")"
 
-                if [[ "$START_TIME_SEC" < "$LIMIT" ]]; then
+                if [[ "$START_TIME_SEC" < "$START_LIMIT" ]]; then
                     break;
                 fi
                 ;;
             "5")
-                # Not used at the moment
-                #local END_TIME="$line"
+                local END_TIME="$line"
+                END_TIME_SEC="$(dateFormatToSeconds "$(cut -d' ' -f1,2 --complement <<<"$END_TIME")")"
+
+                if [[ "$END_TIME_SEC" < "$END_LIMIT" ]]; then
+                  IS_INSIDE_TIME_SPAN="yes"
+                fi
                 ;;
             "6")
+                if [ "$IS_INSIDE_TIME_SPAN" = "no" ]; then
+                  COUNT=1
+                  continue
+                fi
+
                 local DURATION="$line"
                 if [ -a "$REPORTS/$CLIENT/$PROJECT" ]; then
                   OLD_DURATION="$(cat "$REPORTS/$CLIENT/$PROJECT")"
@@ -494,16 +507,22 @@ sumEntries()
   if [[ -z "$1" ]]; then
       NOW="$(dateNow)"
       TWELVE_HOURS="$((3600*12))"
-      LIMIT="$((NOW - TWELVE_HOURS))"
+      START_LIMIT="$((NOW - TWELVE_HOURS))"
+      END_LIMIT="$NOW"
+  elif [[ -z "$2" ]]; then
+      NOW="$(dateNow)"
+      START_LIMIT="$1"
+      END_LIMIT="$NOW"
   else
-      LIMIT="$(date --date "$1" +%s)"
+      START_LIMIT="$1"
+      END_LIMIT="$2"
   fi
 
   local HOURS=0
   local MINUTES=0
   local SEC=0
 
-  extractAndSumEntries "$LIMIT"
+  extractAndSumEntries "$START_LIMIT" "$END_LIMIT"
 
   if [[ -f "$ACTIVE" ]]; then
 
@@ -600,6 +619,29 @@ summarize()
 	esac
 }
 
+chooseDate()
+{
+  INFO="$1"
+
+  NOW="$(dateNow)"
+  OFFSET=0
+  DAYS_IN_A_YEAR="365"
+  printf '%s\n' "" >> "$DATE_FILE_PATH"
+  while [[ "$OFFSET" -lt "$DAYS_IN_A_YEAR" ]]; do
+    CURRENT_HOUR_IN_SEC="$((NOW - OFFSET * 3600 * 24))"
+    CURRENT_HOUR="$(dateSecondsToShortFormat "$CURRENT_HOUR_IN_SEC")"
+    printf '%s\n' "$CURRENT_HOUR" >> "$DATE_FILE_PATH"
+    OFFSET=$((OFFSET + 1))
+  done
+  ANS="$(parseUnderscores "$(show "$INFO" "$(parseSpaces "$(cat "$DATE_FILE_PATH")")" "vertical-list")")"
+  if [ -z "$ANS" ]; then
+    echo ""
+  else
+    dateFormatToSeconds "$ANS"
+  fi
+  rm "$DATE_FILE_PATH"
+}
+
 #############
 # Main loop #
 #############
@@ -633,8 +675,9 @@ main()
                 ANS="$(show "Sum by time or project?" "time project")"
                 case "$ANS" in
                     "time")
-                        TIME="$(show "Sum entries from when? (leave empty for 12h)")"
-                        sumEntries "$TIME"
+                        FROM_TIME="$(chooseDate "Sum entries from when? (leave empty for 12h)")"
+                        TO_TIME="$(chooseDate "Sum entries to when? (leave empty for now)")"
+                        sumEntries "$FROM_TIME" "$TO_TIME"
                     ;;
                     "project")
                         chooseProject "summarize"
