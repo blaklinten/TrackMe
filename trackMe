@@ -21,6 +21,7 @@ export REPORTS="$CLIENTS/reports"
 export FINAL_REPORT="$REPORTS/final"
 
 export DATE_FORMAT='+%a %b %e %Y %H:%M:%S %Z'
+export DATE_SHORT_FORMAT='+%a %b %e %Y'
 
 if [[ ! -d "$CLIENTS" ]]; then
     mkdir -p "$CLIENTS"
@@ -71,6 +72,31 @@ gitAdd()
 
 }
 
+########################
+# Date transformations #
+########################
+
+dateSecondsToFormat()
+{
+  date "$DATE_FORMAT" --date="@$1"
+}
+
+dateSecondsToShortFormat()
+{
+  date "$DATE_SHORT_FORMAT" --date="@$1"
+}
+
+dateFormatToSeconds()
+{
+  date --date "$1" +%s
+}
+
+dateNow()
+{
+  date +%s
+}
+
+
 ####################
 # Getting feedback #
 ####################
@@ -98,9 +124,9 @@ showStatus()
     ACTIVITY=$(tail -n 3 "$ACTIVE" | head -n 1 )
     PROJECT=$(tail -n 3 "$ACTIVE" | head -n 2 | tail -n 1)
     START=$(tail -n 1 "$ACTIVE")
-    END=$(date +%s)
+    END=$(dateNow)
 
-    show "Timer running for $(parseUnderscores $ACTIVITY) on $PROJECT Started at $(date "$DATE_FORMAT" --date="@$START"). Running for $(diff "$START" "$END")."
+    show "Timer running for $(parseUnderscores $ACTIVITY) on $PROJECT Started at $(dateSecondsToFormat "$START"). Running for $(diff "$START" "$END")."
 }
 
 #######################
@@ -239,11 +265,11 @@ startActivity()
     	return
 	fi
 
-	START=$(date +%s)
-
+	START=$(dateNow)
   printf '%s\n%s\n%s\n%s\n' "$CLIENT" "$ACTIVITY" "$PROJECT" "$START" >> "$ACTIVE"
 
-	show "$(parseUnderscores $ACTIVITY)@$(parseUnderscores $PROJECT) started at $(date "$DATE_FORMAT" --date="@$START")"
+
+	show "$(parseUnderscores $ACTIVITY)@$(parseUnderscores $PROJECT) started at $(dateSecondsToFormat "$START")"
 }
 
 createAndSaveStopEvent()
@@ -254,8 +280,8 @@ createAndSaveStopEvent()
   PROJECT="$4"
 
   local -r DURATION="Duration: $(diff "$START" "$END")"
-  local -r ENDED="Ended at $(date "$DATE_FORMAT" --date="@$END")"
-  local -r STARTED="Started at $(date "$DATE_FORMAT" --date="@$START")"
+  local -r ENDED="Ended at $(dateSecondsToFormat "$END")"
+  local -r STARTED="Started at $(dateSecondsToFormat "$START")"
   local -r ACTIVITY="Activity: $ACTIVITY"
   local -r PROJECT="Project: $PROJECT"
   local -r CLIENT="Client: $CLIENT"
@@ -270,8 +296,8 @@ saveActivity()
   ACTIVITY="$3"
   PROJECT="$4"
 
-  STARTED="Started at $(date "$DATE_FORMAT" --date="@$START")"
-  ENDED="Ended at $(date "$DATE_FORMAT" --date="@$END")"
+  STARTED="Started at $(dateSecondsToFormat "$START")"
+  ENDED="Ended at $(dateSecondsToFormat "$END")"
   DURATION="Duration: $(diff "$START" "$END")"
 
   printf '%s\n%s\n%s\n' "$STARTED" "$ENDED" "$DURATION" >> "$PROJECTS/$PROJECT/$ACTIVITY"
@@ -289,7 +315,7 @@ stopActivity()
   fi
 
   START=$(tail -n 1 "$ACTIVE")
-  END=$(date +%s)
+  END=$(dateNow)
   ACTIVITY=$(tail -n 3 "$ACTIVE" | head -n 1)
   PROJECT=$(tail -n 3 "$ACTIVE" | head -n 2 | tail -n 1)
 
@@ -335,7 +361,7 @@ editRunning()
                 show "No change..."
                 return
             fi
-            START=$(date --date $ANS +%s)
+            START=$(dateFormatToSeconds "$ANS")
         ;;
         "Project")
             ANS=$(show "Enter new project name: " "$(ls $PROJECTS)")
@@ -365,7 +391,7 @@ editRunning()
 
     updateActiveState "$START" "$ACTIVITY" "$PROJECT"
 
-	show "$(parseUnderscores $ACTIVITY)@$(parseUnderscores $PROJECT) started at $(date "$DATE_FORMAT" --date="@$START")"
+	show "$(parseUnderscores $ACTIVITY)@$(parseUnderscores $PROJECT) started at $(dateSecondsToFormat "$START")"
 }
 
 ################
@@ -424,7 +450,7 @@ extractAndSumEntries()
                 ;;
             "4")
                 local START_TIME="$line"
-                START_TIME_SEC="$(date --date "$(cut -d' ' -f1,2 --complement <<<"$START_TIME")" +%s)"
+                START_TIME_SEC="$(dateFormatToSeconds "$(cut -d' ' -f1,2 --complement <<<"$START_TIME")")"
 
                 if [[ "$START_TIME_SEC" < "$LIMIT" ]]; then
                     break;
@@ -466,7 +492,7 @@ extractAndSumEntries()
 sumEntries()
 {
   if [[ -z "$1" ]]; then
-      NOW="$(date +%s)"
+      NOW="$(dateNow)"
       TWELVE_HOURS="$((3600*12))"
       LIMIT="$((NOW - TWELVE_HOURS))"
   else
@@ -484,7 +510,7 @@ sumEntries()
       CLIENT=$(head -n 1 "$ACTIVE")
       PROJECT=$(tail -n 3 "$ACTIVE" | head -n 2 | tail -n 1)
       START=$(tail -n 1 "$ACTIVE")
-      NOW=$(date +%s)
+      NOW=$(dateNow)
       DURATION="$(diff "$START" "$NOW")"
 
       if [ -a "$REPORTS/$CLIENT/$PROJECT" ]; then
