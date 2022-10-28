@@ -504,13 +504,14 @@ extractAndSumEntries()
 
 sumEntries()
 {
+  local NOW
+  NOW="$(dateNow)"
+
   if [[ -z "$1" ]]; then
-      NOW="$(dateNow)"
       TWELVE_HOURS="$((3600*12))"
       START_LIMIT="$((NOW - TWELVE_HOURS))"
       END_LIMIT="$NOW"
   elif [[ -z "$2" ]]; then
-      NOW="$(dateNow)"
       START_LIMIT="$1"
       END_LIMIT="$NOW"
   else
@@ -524,7 +525,7 @@ sumEntries()
 
   extractAndSumEntries "$START_LIMIT" "$END_LIMIT"
 
-  if [[ -f "$ACTIVE" ]]; then
+  if [[ -f "$ACTIVE" ]] && [[ "$END_LIMIT" = "$NOW" ]]; then
 
       CLIENT=$(head -n 1 "$ACTIVE")
       PROJECT=$(tail -n 3 "$ACTIVE" | head -n 2 | tail -n 1)
