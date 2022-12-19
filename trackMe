@@ -627,7 +627,7 @@ chooseDate()
   NOW="$(dateNow)"
   OFFSET=0
   DAYS_IN_A_YEAR="365"
-  printf '%s\n' "" >> "$DATE_FILE_PATH"
+  printf '\n' >> "$DATE_FILE_PATH"
   while [[ "$OFFSET" -lt "$DAYS_IN_A_YEAR" ]]; do
     CURRENT_HOUR_IN_SEC="$((NOW - OFFSET * 3600 * 24))"
     CURRENT_HOUR="$(dateSecondsToShortFormat "$CURRENT_HOUR_IN_SEC")"
