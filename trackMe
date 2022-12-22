@@ -122,9 +122,9 @@ showStatus()
         return
     fi
 
-    ACTIVITY=$(tail -n 3 "$ACTIVE" | head -n 1 )
-    PROJECT=$(tail -n 3 "$ACTIVE" | head -n 2 | tail -n 1)
-    START=$(tail -n 1 "$ACTIVE")
+    ACTIVITY=$(sed -n 2p "$ACTIVE")
+    PROJECT=$(sed -n 3p "$ACTIVE")
+    START=$(sed -n 4p "$ACTIVE")
     END=$(dateNow)
 
     show "Timer running for $(parseUnderscores $ACTIVITY) on $PROJECT Started at $(dateSecondsToFormat "$START"). Running for $(diff "$START" "$END")."
@@ -316,10 +316,10 @@ stopActivity()
       return
   fi
 
-  START=$(tail -n 1 "$ACTIVE")
+  START=$(sed -n 4p "$ACTIVE")
   END=$(dateNow)
-  ACTIVITY=$(tail -n 3 "$ACTIVE" | head -n 1)
-  PROJECT=$(tail -n 3 "$ACTIVE" | head -n 2 | tail -n 1)
+  ACTIVITY=$(sed -n 2p "$ACTIVE")
+  PROJECT=$(sed -n 3p "$ACTIVE")
 
   saveActivity "$START" "$END" "$ACTIVITY" "$PROJECT"
   createAndSaveStopEvent "$START" "$END" "$ACTIVITY" "$PROJECT"
@@ -350,9 +350,9 @@ editRunning()
       return
   fi
 
-  START=$(tail -n 1 "$ACTIVE")
-  ACTIVITY=$(tail -n 3 "$ACTIVE" | head -n 1)
-  PROJECT=$(tail -n 3 "$ACTIVE" | head -n 2 | tail -n 1)
+  ACTIVITY=$(sed -n 2p "$ACTIVE")
+  PROJECT=$(sed -n 3p "$ACTIVE")
+  START=$(sed -n 4p "$ACTIVE")
 
 	CHOICE="$(show "Choose what to edit:" "Start Project Activity")"
 
@@ -527,9 +527,9 @@ sumEntries()
 
   if [[ -f "$ACTIVE" ]] && [[ "$END_LIMIT" = "$NOW" ]]; then
 
-      CLIENT=$(head -n 1 "$ACTIVE")
-      PROJECT=$(tail -n 3 "$ACTIVE" | head -n 2 | tail -n 1)
-      START=$(tail -n 1 "$ACTIVE")
+      CLIENT=$(sed -n 1p "$ACTIVE")
+      PROJECT=$(sed -n 3p "$ACTIVE")
+      START=$(sed -n 4p "$ACTIVE")
       NOW=$(dateNow)
       DURATION="$(diff "$START" "$NOW")"
 
@@ -656,7 +656,7 @@ main()
             exit
         fi
 	else
-    	CLIENT=$(head -n 1 "$ACTIVE")
+    	CLIENT=$(sed -n 1p "$ACTIVE")
     	show "Client $(parseUnderscores "$CLIENT") is running a timer."
 	fi
 	PROJECTS="$CLIENTS/$CLIENT"
