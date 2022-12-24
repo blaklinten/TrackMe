@@ -1,6 +1,10 @@
 #!/bin/bash
 
-WD="./trackmedata"
+###############################################
+# Clean up entries in DB based on these rules #
+###############################################
+source "./constants"
+
 cd "$WD/" || exit
 
 find . -type f -not -path './.git*' -not -name "*.csv" -exec sed -i \

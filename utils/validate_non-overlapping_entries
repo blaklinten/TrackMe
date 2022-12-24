@@ -1,0 +1,50 @@
+#!/bin/bash
+
+#######################################################################
+# Validate there is no overlapping evntries in temp sorted event file #
+#######################################################################
+
+echo "Validating no overlapping entries..."
+TOTAL=0
+COUNT=0
+while read -r line; do
+  if [ "$COUNT" = 0 ]; then
+    echo "First row, skipping..."
+    CURRENT_START_TIME_SEC="$(cut -d' ' -f1 <<<"$line")"
+    CURRENT_END_TIME_SEC="$(cut -d' ' -f2 <<<"$line")"
+    CURRENT_ACTIVITY="$(cut -d' ' -f4 <<<"$line")"
+    CURRENT_PROJECT="$(cut -d' ' -f5 <<<"$line")"
+    CURRENT_CLIENT="$(cut -d' ' -f6 <<<"$line")"
+    ((COUNT += 1))
+    continue
+  fi
+
+  PREVIOUS_START_TIME_SEC="$CURRENT_START_TIME_SEC"
+  PREVIOUS_END_TIME_SEC="$CURRENT_END_TIME_SEC"
+  PREVIOUS_ACTIVITY="$CURRENT_ACTIVITY"
+  PREVIOUS_PROJECT="$CURRENT_PROJECT"
+  PREVIOUS_CLIENT="$CURRENT_CLIENT"
+
+  CURRENT_START_TIME_SEC="$(cut -d' ' -f1 <<<"$line")"
+  CURRENT_END_TIME_SEC="$(cut -d' ' -f2 <<<"$line")"
+  CURRENT_ACTIVITY="$(cut -d' ' -f4 <<<"$line")"
+  CURRENT_PROJECT="$(cut -d' ' -f5 <<<"$line")"
+  CURRENT_CLIENT="$(cut -d' ' -f6 <<<"$line")"
+
+  if [ "$PREVIOUS_END_TIME_SEC" -gt "$CURRENT_START_TIME_SEC" ]; then
+    ((TOTAL += 1))
+    printf '%s %s %s\n' \
+      "Line $COUNT, at $(dateSecondsToFormat "$CURRENT_START_TIME_SEC"):" \
+      "${CURRENT_ACTIVITY}@${CURRENT_PROJECT} by $CURRENT_CLIENT starts before" \
+      "${PREVIOUS_ACTIVITY}@${PREVIOUS_PROJECT} by $PREVIOUS_CLIENT ends."
+
+   if [ "$CURRENT_ACTIVITY" = "$PREVIOUS_ACTIVITY" ]; then
+     echo "Activity $CURRENT_ACTIVITY is same, duplicate entry?"
+     printf '[%s] - [%s] - [%s] - [%s] - [%s]\n[%s] - [%s] - [%s] - [%s] - [%s]\n' \
+       "$(dateSecondsToFormat "$PREVIOUS_START_TIME_SEC")" "$(dateSecondsToFormat "$PREVIOUS_END_TIME_SEC")" "$PREVIOUS_ACTIVITY" "$PREVIOUS_PROJECT" "$PREVIOUS_CLIENT" \
+       "$(dateSecondsToFormat "$CURRENT_START_TIME_SEC")" "$(dateSecondsToFormat "$CURRENT_END_TIME_SEC")" "$CURRENT_ACTIVITY" "$CURRENT_PROJECT" "$CURRENT_CLIENT"
+   fi
+  fi
+  ((COUNT += 1))
+done<"${EVENT_FILE}-sorted"
+echo "Validation done, $TOTAL errors were found."
