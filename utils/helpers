@@ -1,0 +1,27 @@
+#!/bin/bash
+
+dateSecondsToFormat()
+{
+  date "$DATE_FORMAT" --date="@$1"
+}
+
+dateFormatToSeconds()
+{
+  date --date "$1" +%s
+}
+
+diff()
+{
+  if [ "$1" -gt "$2" ]; then
+    echo "diff would be negative, this is not allowed! Wrong order of parameters?"
+    return 1
+  fi
+
+  ((DIFF = $2 - $1))
+  ((SECONDS = DIFF % 60))
+  ((MINUTES = (DIFF % 3600) / 60))
+  ((HOURS = DIFF / 3600))
+
+	echo "$HOURS:$MINUTES:$SECONDS"
+
+}
