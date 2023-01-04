@@ -10,6 +10,7 @@ source "./utils/helpers"
 echo "Validating duration..."
 LINES="$(wc -l "${EVENT_FILE}-sorted" | cut -d' ' -f1)"
 LINE_COUNT=0
+ERRORS=0
 while read -r line; do
   ((LINE_COUNT += 1))
   if [ "$((LINE_COUNT % 10))" = "0" ]; then
@@ -24,8 +25,9 @@ while read -r line; do
   REAL_DURATION="$(diff "$START_TIME_SEC" "$END_TIME_SEC")"
 
   if [ "$DURATION" != "$REAL_DURATION" ]; then
-   echo "${ACTIVITY}@${PROJECT} by $CLIENT has invalid duration <$DURATION> - Should be $REAL_DURATION"
+    ((ERRORS += 1))
+    echo "${ACTIVITY}@${PROJECT} by $CLIENT has invalid duration <$DURATION> - Should be $REAL_DURATION"
   fi
 done<"${EVENT_FILE}-sorted"
 printf '\r\e[0K%s\n' "$LINE_COUNT lines processed out of $LINES."
-echo "Validation done."
+echo "Validation done, $ERRORS errors were found."
