@@ -86,12 +86,12 @@ while read -r line; do
   ACTIVITY="$(cut -d' ' -f6 <<<"$line")"
 
   printf '%s\n%s\n%s\n%s\n%s\n%s\n' \
+    "Duration: $DURATION" \
+    "Ended at $END_TIME" \
+    "Started at $START_TIME" \
     "Activity: $ACTIVITY" \
     "Project: $PROJECT" \
     "Client: $CLIENT" \
-    "Started at $START_TIME" \
-    "Ended at $END_TIME" \
-    "Duration: $DURATION" \
     >> "$FINAL_EVENT_FILE"
 
 done<"${EVENT_FILE}-sorted"
