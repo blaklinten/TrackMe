@@ -40,7 +40,8 @@ for CLIENT in "$CLIENTS"/*; do
           "2")
               END_TIME="$line"
               if ! END_TIME_SEC="$(dateFormatToSeconds "$(cut -d' ' -f1,2 --complement <<<"$END_TIME")")"; then
-                echo "ERROR: end time <$END_TIME> is invalid!" exit
+                echo "ERROR: end time <$END_TIME> is invalid!"
+                exit
               fi
             ;;
           "3")
