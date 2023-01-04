@@ -3,11 +3,13 @@
 ###############################################
 # Clean up entries in DB based on these rules #
 ###############################################
-source "./constants"
+source "./utils/constants"
 
-cd "$WD/" || exit
+cd "$WD/$CLIENTS" || exit
 
-find . -type f -not -path './.git*' -not -name "*.csv" -exec sed -i \
+echo "Cleaning up entries with sed..."
+
+find . -type f -not -path './.git*' -not -path './.raw_data*' -exec sed -i \
   -e 's/\ mån\ /\ Mon\ /' \
   -e 's/\ tis\ /\ Tue\ /' \
   -e 's/\ ons\ /\ Wed\ /' \
@@ -21,3 +23,5 @@ find . -type f -not -path './.git*' -not -name "*.csv" -exec sed -i \
   -e 's/0\([[:digit:]]:\)/\1/' \
   -e 's/:0\([[:digit:]]\)/:\1/' \
   {} \;
+
+echo "Done cleaning up entries."

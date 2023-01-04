@@ -25,3 +25,36 @@ diff()
 	echo "$HOURS:$MINUTES:$SECONDS"
 
 }
+
+showSpinner()
+{
+  INFO="$1"
+  SPINNER_SEED="$2"
+  case $((SPINNER_SEED % 8)) in
+    "0")
+      SPINNER="|"
+      ;;
+    "1")
+      SPINNER="/"
+      ;;
+    "2")
+      SPINNER="―"
+      ;;
+    "3")
+      SPINNER="\\"
+      ;;
+    "4")
+      SPINNER="|"
+      ;;
+    "5")
+      SPINNER="/"
+      ;;
+    "6")
+      SPINNER="―"
+      ;;
+    "7")
+      SPINNER="\\"
+      ;;
+  esac
+  printf '\r\e[0K%s  %s' "$SPINNER"   "$INFO"
+}
