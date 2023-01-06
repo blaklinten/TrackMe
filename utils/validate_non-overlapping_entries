@@ -10,7 +10,7 @@ source "./utils/helpers"
 echo "Validating no overlapping entries..."
 TOTAL=0
 COUNT=0
-LINES="$(wc -l "${EVENT_FILE}-sorted" | cut -d' ' -f1)"
+LINES_TO_PROCESS="$(wc -l "${EVENT_FILE}-sorted" | cut -d' ' -f1)"
 while read -r line; do
   if [ "$COUNT" = 0 ]; then
     echo "First row, skipping..."
@@ -24,7 +24,7 @@ while read -r line; do
   fi
 
   if [ "$((COUNT % 10))" = "0" ]; then
-    printf '\r\e[0K%s' "$COUNT lines processed out of $LINES."
+    printf '\r\e[0K%s' "$COUNT lines processed out of $LINES_TO_PROCESS."
   fi
 
   PREVIOUS_START_TIME_SEC="$CURRENT_START_TIME_SEC"
@@ -55,5 +55,5 @@ while read -r line; do
   fi
   ((COUNT += 1))
 done<"${EVENT_FILE}-sorted"
-printf '\r\e[0K%s\n' "$COUNT lines processed out of $LINES."
+printf '\r\e[0K%s\n' "$COUNT lines processed out of $LINES_TO_PROCESS."
 echo "Validation done, $TOTAL errors were found."
