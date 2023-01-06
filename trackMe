@@ -20,7 +20,7 @@ else
   export GITSYNC="no"
 fi
 
-export DATE_FORMAT='+%a %b %e %Y %H:%M:%S %Z'
+export DATE_FORMAT='-R'
 export DATE_SHORT_FORMAT='+%a %b %e %Y'
 
 if [[ ! -d "$CLIENTS" ]]; then

@@ -8,4 +8,4 @@ export WD="$HOME/Git/trackMe"
 export CLIENTS="trackmedata"
 export EVENT_FILE="$WD/event_file"
 export FINAL_EVENT_FILE="$WD/events"
-export DATE_FORMAT='+%a %b %e %Y %H:%M:%S %Z'
+export DATE_FORMAT='-R'
