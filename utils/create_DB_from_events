@@ -1,0 +1,45 @@
+#!/bin/bash
+
+######################################
+# Create a new DB from an event-file #
+######################################
+
+source "./utils/constants"
+source "./utils/helpers"
+
+LINES="$(wc -l "${EVENT_FILE}-sorted" | cut -d' ' -f1)"
+LINE_COUNT=0
+DB="new-$CLIENTS"
+
+echo "Creating a new DB in $DB"
+if [ -d "$DB" ]; then
+  rm -rf "$DB"
+fi
+mkdir "$DB"
+
+while read -r line; do
+  ((LINE_COUNT += 1))
+  if [ "$((LINE_COUNT % 10))" = "0" ]; then
+    printf '\r\e[0K%s' "$LINE_COUNT lines processed out of $LINES."
+  fi
+  START_TIME_SEC="$(cut -d' ' -f1 <<<"$line")"
+  START_TIME="$( dateSecondsToFormat "$START_TIME_SEC")"
+  END_TIME_SEC="$(cut -d' ' -f2 <<<"$line")"
+  END_TIME="$(dateSecondsToFormat "$END_TIME_SEC")"
+  DURATION="$(cut -d' ' -f3 <<<"$line")"
+  CLIENT="$(cut -d' ' -f4 <<<"$line")"
+  PROJECT="$(cut -d' ' -f5 <<<"$line")"
+  ACTIVITY="$(cut -d' ' -f6 <<<"$line")"
+
+  if [ ! -d "$DB/$CLIENT/$PROJECT" ]; then
+    mkdir -p "$DB/$CLIENT/$PROJECT"
+  fi
+
+  printf '%s\n%s\n%s\n' \
+    "Started at $START_TIME" \
+    "Ended at $END_TIME" \
+    "Duration: $DURATION" \
+    >> "$DB/$CLIENT/$PROJECT/$ACTIVITY"
+
+done<"${EVENT_FILE}-sorted"
+printf '\r\e[0K%s\n' "$LINE_COUNT lines processed out of $LINES."
