@@ -21,7 +21,7 @@ export REPORTS="$CLIENTS/reports"
 export FINAL_REPORT="$REPORTS/final"
 export DATE_FILE_PATH="$CLIENTS/dates"
 
-export DATE_FORMAT='+%a %b %e %Y %H:%M:%S %Z'
+export DATE_FORMAT='-R'
 export DATE_SHORT_FORMAT='+%a %b %e %Y'
 
 if [[ ! -d "$CLIENTS" ]]; then
