@@ -21,7 +21,7 @@ export REPORTS="$CLIENTS/reports"
 export FINAL_REPORT="$REPORTS/final"
 
 export PS3="Make your choice! "
-export DATE_FORMAT='+%a %b %e %Y %H:%M:%S %Z'
+export DATE_FORMAT='-R'
 
 if [[ ! -d "$CLIENTS" ]]; then
     mkdir -p "$CLIENTS"
