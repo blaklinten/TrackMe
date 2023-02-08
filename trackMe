@@ -5,22 +5,20 @@
 #########################################################
 # These are the configuration options
 #
-export GITSYNC="no"
 
-###### TODO ######
-# Fix info if    #
-# git is not     #
-# available      #
-##################
-
-export WD="$HOME/Git/TrackMe"
 export CLIENTS="$HOME/.trackme"
 export ACTIVE="$CLIENTS/active"
 export EVENT_FILE="$CLIENTS/events"
 export REPORTS="$CLIENTS/reports"
 export FINAL_REPORT="$REPORTS/final"
-
 export PS3="Make your choice! "
+
+if [ -f "$HOME/.TRACKME_GIT_SYNC" ]; then
+  export GITSYNC="yes"
+else
+  export GITSYNC="no"
+fi
+
 export DATE_FORMAT='-R'
 
 if [[ ! -d "$CLIENTS" ]]; then
