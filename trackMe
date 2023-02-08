@@ -5,21 +5,19 @@
 #########################################################
 # These are the configuration options
 #
-export GITSYNC="no"
 
-###### TODO ######
-# Fix info if    #
-# git is not     #
-# available      #
-##################
-
-export WD="$HOME/Git/TrackMe"
 export CLIENTS="$HOME/.trackme"
 export ACTIVE="$CLIENTS/active"
 export EVENT_FILE="$CLIENTS/events"
 export REPORTS="$CLIENTS/reports"
 export FINAL_REPORT="$REPORTS/final"
 export DATE_FILE_PATH="$CLIENTS/dates"
+
+if [ -f "$HOME/.TRACKME_GIT_SYNC" ]; then
+  export GITSYNC="yes"
+else
+  export GITSYNC="no"
+fi
 
 export DATE_FORMAT='-R'
 export DATE_SHORT_FORMAT='+%a %b %e %Y'
