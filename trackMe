@@ -151,7 +151,7 @@ chooseClient()
 {
 	SCRIPT=$1
 
-	AVAILABLE_CLIENTS="$(ls $CLIENTS) new summarize quit"
+	AVAILABLE_CLIENTS="$(ls $CLIENTS) new restart summarize quit"
 	show "Choose an existing client, create a new, summarize or quit:" "$AVAILABLE_CLIENTS"
 	CHOICE="$(parseSpaces "$ANS")"
 
@@ -164,6 +164,10 @@ chooseClient()
     	"new")
         	createClient 
         	return
+       ;;
+       "restart")
+           restartLatest
+           return
        ;;
        "summarize")
             show "Sum entries from when? (leave empty for 12h)"
@@ -251,6 +255,22 @@ startActivity()
   printf '%s\n%s\n%s\n%s\n' "$CLIENT" "$ACTIVITY" "$PROJECT" "$START" >> "$ACTIVE"
 
 	show "$(parseUnderscores $ACTIVITY)@$(parseUnderscores $PROJECT) started at $(date "$DATE_FORMAT" --date="@$START")"
+}
+
+restartLatest()
+{
+  local CLIENT
+  CLIENT="$(tail -n6 "$EVENT_FILE" | sed -n '6p' | cut -d' ' -f2)"
+  local PROJECT
+  PROJECT="$(tail -n6 "$EVENT_FILE" | sed -n '5p' | cut -d' ' -f2)"
+  local ACTIVITY
+  ACTIVITY="$(tail -n6 "$EVENT_FILE" | sed -n '4p' | cut -d' ' -f2)"
+	local START
+  START="$(dateNow)"
+
+  printf '%s\n%s\n%s\n%s\n' "$CLIENT" "$ACTIVITY" "$PROJECT" "$START" >> "$ACTIVE"
+
+	show "$(parseUnderscores $ACTIVITY)@$(parseUnderscores $PROJECT) started at $(dateSecondsToFormat "$START")"
 }
 
 createAndSaveStopEvent()
@@ -599,7 +619,10 @@ main()
 		if [[ "$ANS" == "summarize" ]]; then
             main
             exit
-        fi
+    elif [[ "$ANS" == "restart" ]]; then
+            main
+            exit
+    fi
 	else
     	CLIENT=$(head -n 1 "$ACTIVE")
     	show "Client $(parseUnderscores "$CLIENT") is running a timer."
@@ -607,16 +630,24 @@ main()
 	PROJECTS="$CLIENTS/$CLIENT"
 
 	while true; do
-		show "$CLIENT: What do you want to do?" "start stop edit status summarize help switch quit"
+		show "$CLIENT: What do you want to do?" "startNew restart stop edit status summarize help switch quit"
 		CHOICE="$ANS"
     	case "$CHOICE" in
-        	"start")
+        	"startNew")
             	if [[ -f "$ACTIVE" ]]; then
                 	show "A timer is already running..."
             	else
                 	chooseProject "startActivity"
             	fi
             	;;
+          "restart")
+            	if [[ -f "$ACTIVE" ]]; then
+                	show "A timer is already running..."
+            	else
+                	restartLatest
+            	fi
+              
+              ;;
         	"summarize")
                 show "Sum by time or project?" "time project"
                 case "$ANS" in
