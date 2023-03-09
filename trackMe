@@ -152,7 +152,7 @@ chooseClient()
 	SCRIPT=$1
 
 	AVAILABLE_CLIENTS="$(ls $CLIENTS) new restart summarize quit"
-	show "Choose an existing client, create a new, summarize or quit:" "$AVAILABLE_CLIENTS"
+	show "Choose an existing client, create a new, restart last, summarize or quit:" "$AVAILABLE_CLIENTS"
 	CHOICE="$(parseSpaces "$ANS")"
 
 	case "$CHOICE" in
@@ -266,11 +266,11 @@ restartLatest()
   local ACTIVITY
   ACTIVITY="$(tail -n6 "$EVENT_FILE" | sed -n '4p' | cut -d' ' -f2)"
 	local START
-  START="$(dateNow)"
+  START="$(date +%s)"
 
   printf '%s\n%s\n%s\n%s\n' "$CLIENT" "$ACTIVITY" "$PROJECT" "$START" >> "$ACTIVE"
 
-	show "$(parseUnderscores $ACTIVITY)@$(parseUnderscores $PROJECT) started at $(dateSecondsToFormat "$START")"
+	show "$(parseUnderscores $ACTIVITY)@$(parseUnderscores $PROJECT) started at $(date "$DATE_FORMAT" --date="@$START")"
 }
 
 createAndSaveStopEvent()
