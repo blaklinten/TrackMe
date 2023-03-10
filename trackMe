@@ -37,8 +37,8 @@ gitPull()
 {
 	pushd "$CLIENTS" &> /dev/null || exit
 	show "Git: Pulling..." &
-	git pull &> /dev/null
-	if [[ "$?" == "0" ]]; then
+	
+	if git pull &> /dev/null; then
         show "Git: Pull succeeded!"
     else
         show "Git: Pull failed..."
@@ -54,8 +54,8 @@ gitPush()
 	pushd "$CLIENTS" &> /dev/null || exit
 	show "Git: Pushing $ACTIVITY, $PROJECT..." &
 	git commit -am "Time entry for $ACTIVITY, $PROJECT" &> /dev/null
-	git push &> /dev/null
-	if [[ "$?" == "0" ]]; then
+	
+	if git push &> /dev/null; then
         show "Git: Push succeeded!"
     else
         show "Git: Push failed..."
@@ -115,7 +115,7 @@ show()
 			break
 		done
 	else
-		read ANS
+		read -r ANS
 	fi
 }
 
@@ -131,7 +131,7 @@ showStatus()
     START=$(sed -n 4p "$ACTIVE")
     END=$(dateNow)
 
-    show "Timer running for $(parseUnderscores $ACTIVITY) on $PROJECT Started at $(dateSecondsToFormat "$START"). Running for $(diff "$START" "$END")."
+    show "Timer running for $(parseUnderscores "$ACTIVITY") on $PROJECT Started at $(dateSecondsToFormat "$START"). Running for $(diff "$START" "$END")."
 }
 
 #######################
@@ -140,12 +140,14 @@ showStatus()
 
 parseSpaces()
 {
-    echo "$@" | sed s/\ /\_/g
+  ARGS="$*"
+  echo "${ARGS// /_}"
 }
 
 parseUnderscores()
 {
-    echo "$@" | sed s/\_/\ /g
+  ARGS="$*"
+  echo "${ARGS//_/ }"
 }
 
 ###############################
@@ -154,13 +156,12 @@ parseUnderscores()
 
 createClient()
 {
-	SCRIPT="$1"
 	show "Enter name of new client:"
 	CLIENT=$(parseSpaces "$ANS")
 
 	mkdir "$CLIENTS/$CLIENT"
 
-	chooseClient "$SCRIPT"
+	chooseClient
 }
 
 createProject()
@@ -176,9 +177,7 @@ createProject()
 
 chooseClient()
 {
-	SCRIPT=$1
-
-	AVAILABLE_CLIENTS="$(ls $CLIENTS) new restart summarize quit"
+	AVAILABLE_CLIENTS="$(ls "$CLIENTS") new restart summarize quit"
 	show "Choose an existing client, create a new, restart last, summarize or quit:" "$AVAILABLE_CLIENTS"
 	CHOICE="$(parseSpaces "$ANS")"
 
@@ -210,8 +209,8 @@ chooseClient()
                     return
                 fi
             done
-                show "Client \"$CHOICE\" does not exist, try again or create it (new)."
-                chooseClient "$SCRIPT"
+                show "Client \"$CHOICE\" does not exist, try again or create it (n)."
+                chooseClient
        ;;
 	esac
 }
@@ -219,7 +218,7 @@ chooseClient()
 chooseProject()
 {
 	SCRIPT="$1"
-	show "Choose an existing project, create a new or quit" "$(ls $PROJECTS) new quit"
+	show "Choose an existing project, create a new or quit" "$(ls "$PROJECTS") new quit"
 	CHOICE="$(parseSpaces "$ANS")"
 
 	case $CHOICE in
@@ -245,7 +244,6 @@ chooseProject()
 	esac
 }
 
-
 #####################
 # Manage Activities #
 #####################
@@ -258,7 +256,7 @@ startActivity()
     	gitPull
 	fi
 
-	show "What are you doing?" "$(ls $PROJECTS/$PROJECT) new quit"
+	show "What are you doing?" "$(ls "$PROJECTS/$PROJECT") new quit"
 	case "$ANS" in
     	"quit")
         	show "Exiting..."
@@ -282,7 +280,7 @@ startActivity()
   printf '%s\n%s\n%s\n%s\n' "$CLIENT" "$ACTIVITY" "$PROJECT" "$START" >> "$ACTIVE"
 
 
-	show "$(parseUnderscores $ACTIVITY)@$(parseUnderscores $PROJECT) started at $(dateSecondsToFormat "$START")"
+	show "$(parseUnderscores "$ACTIVITY")@$(parseUnderscores "$PROJECT") started at $(dateSecondsToFormat "$START")"
 }
 
 restartLatest()
@@ -298,7 +296,7 @@ restartLatest()
 
   printf '%s\n%s\n%s\n%s\n' "$CLIENT" "$ACTIVITY" "$PROJECT" "$START" >> "$ACTIVE"
 
-	show "$(parseUnderscores $ACTIVITY)@$(parseUnderscores $PROJECT) started at $(date "$DATE_FORMAT" --date="@$START")"
+	show "$(parseUnderscores "$ACTIVITY")@$(parseUnderscores "$PROJECT") started at $(dateSecondsToFormat "$START")"
 }
 
 createAndSaveStopEvent()
@@ -394,11 +392,10 @@ editRunning()
             START=$(dateFormatToSeconds "$ANS")
         ;;
         "Project")
-            show "Choose existing project or enter new project name: " "$(ls $PROJECTS) new"
+            show "Choose existing project or enter new project name: " "$(ls "$PROJECTS") new"
             if [ "$ANS" = "new" ]; then
                 show "Enter new project name: "
-            fi
-            if [ -z "$ANS" ]; then
+            elif [ -z "$ANS" ]; then
                 show "No change..."
                 return
             fi
@@ -410,11 +407,10 @@ editRunning()
             fi
         ;;
         "Activity")
-            show "Choose existing activity or enter new activity name: " "$ACTIVITY $(ls $PROJECTS/$PROJECT) new"
+            show "Choose existing activity or enter new activity name: " "$ACTIVITY $(ls "$PROJECTS/$PROJECT") new"
             if [ "$ANS" = "new" ]; then
                 show "Enter new activity name: "
-            fi
-            if [ -z "$ANS" ]; then
+            elif [ -z "$ANS" ]; then
                 show "No change..."
                 return
             fi
@@ -427,7 +423,7 @@ editRunning()
 
     updateActiveState "$START" "$ACTIVITY" "$PROJECT"
 
-	show "$(parseUnderscores $ACTIVITY)@$(parseUnderscores $PROJECT) started at $(dateSecondsToFormat "$START")"
+	show "$(parseUnderscores "$ACTIVITY")@$(parseUnderscores "$PROJECT") started at $(dateSecondsToFormat "$START")"
 }
 
 ################
@@ -605,9 +601,9 @@ sumActivity()
 {
 	ACTIVITY="$1"
 
-    for DURATION in $(sed -n '0~3p' "$ACTIVITY" | cut -d' ' -f2); do
-	    sum "$DURATION"
-    done
+    while IFS= read -r line || [ -n "$line" ]; do
+      sum "$(cut -d' ' -f2 <<<"$line")"
+    done < <(sed -n '0~3p' "$ACTIVITY")
 }
 
 sumProject()
@@ -627,7 +623,7 @@ summarize()
 	local MINUTES=0
 	local SEC=0
 
-	show "Choose one activity all or quit" "$(ls $PROJECTS/$PROJECT) all quit"
+	show "Choose one activity all or quit" "$(ls "$PROJECTS/$PROJECT") all quit"
 	CHOICE="$(parseSpaces "$ANS")"
 
 	case "$CHOICE" in 
@@ -672,7 +668,7 @@ chooseDate()
   if [ -z "$ANS" ]; then
     echo ""
   else
-    dateFormatToSeconds "$(parseUnderscores $ANS)"
+    dateFormatToSeconds "$(parseUnderscores "$ANS")"
   fi
   rm "$DATE_FILE_PATH"
 }
