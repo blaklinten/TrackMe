@@ -67,6 +67,6 @@ case "$ON_OR_OFF" in
     save_current_working_state
     ;;
   *)
-    echo "Usage: . $0 <on,off>"
+    echo "Usage: $0 <on,off>"
     ;;
 esac
