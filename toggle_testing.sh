@@ -44,8 +44,9 @@ restore_current_working_state()
   if [ -f "$ACTIVE_TIMER.STATE" ];then
     mv "$ACTIVE_TIMER.STATE" "$ACTIVE_TIMER"
     echo "Current timer state restored ✓"
-  elif [ ! -f "$ACTIVE_TIMER.STATE" ];then
-    echo "Error: No state to restore from ✗"
+  else
+    echo "No state to restore from, moving current active to /tmp"
+    mv "$ACTIVE_TIMER" /tmp/
   fi
 }
 
