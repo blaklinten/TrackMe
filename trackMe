@@ -150,40 +150,48 @@ parseUnderscores()
 
 chooseClient()
 {
-	ANS="$(show "Choose an existing client, create a new, summarize by time or quit:" "new restart summarize $(ls "$CLIENTS") quit")"
+	ANS="$(show "Choose an existing client, create a new, summarize by time or quit:" "new restart summarize gitPull gitPush $(ls "$CLIENTS") quit")"
 	CHOICE="$(parseSpaces "$ANS")"
 
 	case "$CHOICE" in
-        "quit")
-            show "Exiting..."
-            pkill trackMe
-            exit
-        ;;
-        "new")
-            createClient
-            return
-        ;;
-        "restart")
-            restartLatest
-            return
-        ;;
-       "summarize")
-            FROM_TIME="$(chooseDate "Sum entries from when? (leave empty for 12h)")"
-            TO_TIME="$(chooseDate "Sum entries to when? (leave empty for now)")"
-            sumEntries "$FROM_TIME" "$TO_TIME"
-            return
-       ;;
-       *)
-            pushd "$CLIENTS" > /dev/zero || exit
-            for CLIENT in *; do
-                if [[ "$CLIENT" == "$CHOICE" ]]; then
-                    popd > /dev/zero || exit
-                    return
-                fi
-            done
-                show "Client \"$CHOICE\" does not exist, try again or create it (n)."
-                chooseClient
-       ;;
+     "gitPull")
+       gitPull
+       chooseClient
+     ;;
+     "gitPush")
+       gitPush
+       chooseClient
+     ;;
+     "quit")
+       show "Exiting..."
+       pkill trackMe
+       exit
+     ;;
+     "new")
+       createClient
+       return
+     ;;
+     "restart")
+       restartLatest
+       return
+     ;;
+    "summarize")
+       FROM_TIME="$(chooseDate "Sum entries from when? (leave empty for 12h)")"
+       TO_TIME="$(chooseDate "Sum entries to when? (leave empty for now)")"
+       sumEntries "$FROM_TIME" "$TO_TIME"
+       return
+    ;;
+    *)
+      pushd "$CLIENTS" > /dev/zero || exit
+      for CLIENT in *; do
+        if [[ "$CLIENT" == "$CHOICE" ]]; then
+          popd > /dev/zero || exit
+          return
+        fi
+      done
+      show "Client \"$CHOICE\" does not exist, try again or create it (n)."
+      chooseClient
+    ;;
 	esac
 }
 
@@ -682,56 +690,62 @@ main()
 	PROJECTS="$CLIENTS/$CLIENT"
 
 	while true; do
-		ANS="$(show "$CLIENT: What do you want to do?" "startNew restart stop edit status summarize help switch quit")"
+		ANS="$(show "$CLIENT: What do you want to do?" "startNew stop restart edit status summarize gitPull gitPush help switch quit")"
 		CHOICE="$ANS"
     	case "$CHOICE" in
-        	"startNew")
-            	if [[ -f "$ACTIVE" ]]; then
-                	show "A timer is already running..."
-            	else
-                	chooseProject "startActivity"
-            	fi
-            	;;
-          "restart")
-            	if [[ -f "$ACTIVE" ]]; then
-                	show "A timer is already running..."
-            	else
-                	restartLatest
-            	fi
-              
-              ;;
-        	"summarize")
-                ANS="$(show "Sum by time or project?" "time project")"
-                case "$ANS" in
-                    "time")
-                        FROM_TIME="$(chooseDate "Sum entries from when? (leave empty for 12h)")"
-                        TO_TIME="$(chooseDate "Sum entries to when? (leave empty for now)")"
-                        sumEntries "$FROM_TIME" "$TO_TIME"
-                    ;;
-                    "project")
-                        chooseProject "summarize"
-                    ;;
-                esac
-            ;;
-        	"stop")
-            	stopActivity
-            ;;
-        	"status")
-            	showStatus
-            ;;
-        	"help")
-            	show "TrackMe - A time tracking program" "Usage: trackme [option] Options: start        - start a timer stop         - stop a running timer, if one exists. status       - check status of running timer, if any. summarize    - summarize time for a specified project and/or activity "
-            ;;
-        	"switch")
-            	main
-            	exit
-            ;;
-            "edit")
-                editRunning
-            ;;
-        	"quit")
-            	exit
-            ;;
+        "gitPull")
+          gitPull
+        ;;
+        "gitPush")
+          gitPush
+        ;;
+        "startNew")
+          	if [[ -f "$ACTIVE" ]]; then
+              	show "A timer is already running..."
+          	else
+              	chooseProject "startActivity"
+          	fi
+        ;;
+        "restart")
+          	if [[ -f "$ACTIVE" ]]; then
+              	show "A timer is already running..."
+          	else
+              	restartLatest
+          	fi
+            
+        ;;
+        "summarize")
+              ANS="$(show "Sum by time or project?" "time project")"
+              case "$ANS" in
+                  "time")
+                      FROM_TIME="$(chooseDate "Sum entries from when? (leave empty for 12h)")"
+                      TO_TIME="$(chooseDate "Sum entries to when? (leave empty for now)")"
+                      sumEntries "$FROM_TIME" "$TO_TIME"
+                  ;;
+                  "project")
+                      chooseProject "summarize"
+                  ;;
+              esac
+        ;;
+        "stop")
+          	stopActivity
+        ;;
+        "status")
+          	showStatus
+        ;;
+        "help")
+          	show "TrackMe - A time tracking program" "Usage: trackme [option] Options: start        - start a timer stop         - stop a running timer, if one exists. status       - check status of running timer, if any. summarize    - summarize time for a specified project and/or activity "
+        ;;
+        "switch")
+          	main
+          	exit
+        ;;
+          "edit")
+              editRunning
+        ;;
+        "quit")
+          	exit
+        ;;
     	esac
 	done
 }
