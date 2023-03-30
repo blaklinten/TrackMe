@@ -178,7 +178,7 @@ createProject()
 
 chooseClient()
 {
-	AVAILABLE_CLIENTS="$(ls "$CLIENTS") new restart summarize quit"
+	AVAILABLE_CLIENTS="$(ls "$CLIENTS") new restart gitPull gitPush summarize quit"
 	show "Choose an existing client, create a new, restart last, summarize or quit:" "$AVAILABLE_CLIENTS"
 	CHOICE="$(parseSpaces "$ANS")"
 
@@ -711,7 +711,7 @@ main()
 	PROJECTS="$CLIENTS/$CLIENT"
 
 	while true; do
-		show "$CLIENT: What do you want to do?" "startNew restart stop edit status summarize help switch quit"
+		show "$CLIENT: What do you want to do?" "startNew restart gitPull gitPush stop edit status summarize help switch quit"
 		CHOICE="$ANS"
     	case "$CHOICE" in
           "gitPull")
