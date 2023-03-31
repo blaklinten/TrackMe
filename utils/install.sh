@@ -16,3 +16,13 @@ elif [ -f ../trackMe ];then
 fi
 
 sudo cp "$TRACKME_SCRIPT" "${INSTALL_DIR_PREFIX}${INSTALL_DIR}/trackMe"
+
+GIT_TRACKME_HASH="$(sha256sum "$TRACKME_SCRIPT" | cut -d' ' -f2)"
+INSTALLED_TRACKME_HASH="$(sha256sum ${INSTALL_DIR}${TRACKME_SCRIPT} | cut -d' ' -f2)"
+
+if [ "$GIT_TRACKME_HASH" = "$INSTALLED_TRACKME_HASH" ];then
+  echo "Successfully installed latest version from Git."
+else
+  echo "Hashes don't match - latest version not installed."
+fi
+
