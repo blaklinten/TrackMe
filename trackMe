@@ -301,6 +301,11 @@ restartLatest()
 
   printf '%s\n%s\n%s\n%s\n' "$CLIENT" "$ACTIVITY" "$PROJECT" "$START" >> "$ACTIVE"
 
+  if [[ "$GITSYNC" == "yes" ]]; then
+      gitAdd "active"
+      gitPush "Active entry for" "$ACTIVITY" "$PROJECT"
+  fi
+
 	show "$(parseUnderscores "$ACTIVITY")@$(parseUnderscores "$PROJECT") started at $(dateSecondsToFormat "$START")"
 }
 
