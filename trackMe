@@ -285,8 +285,6 @@ startActivity()
       gitPush "Active entry for" "$ACTIVITY" "$PROJECT"
   fi
 
-
-
 	show "$(parseUnderscores "$ACTIVITY")@$(parseUnderscores "$PROJECT") started at $(dateSecondsToFormat "$START")"
 }
 
@@ -374,6 +372,11 @@ updateActiveState()
   rm "$ACTIVE"
 
   printf '%s\n%s\n%s\n%s\n' "$CLIENT" "$ACTIVITY" "$PROJECT" "$START" >> "$ACTIVE"
+
+  if [[ "$GITSYNC" == "yes" ]]; then
+      gitAdd "active"
+      gitPush "Updated entry for" "$ACTIVITY" "$PROJECT"
+  fi
 }
 
 editRunning()
