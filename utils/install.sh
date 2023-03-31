@@ -1,6 +1,7 @@
 #!/bin/bash
 
-if [[ "$(git branch | grep "\*")" =~ "dmenu" ]]; then
+BRANCH="$(git branch | grep "\*")" 
+if [[ "$BRANCH" =~ "dmenu" ]]; then
   INSTALL_DIR="/usr/local/bin/"
 else
   INSTALL_DIR="../../../usr/bin/"
@@ -14,4 +15,4 @@ elif [ -f ../trackMe ];then
   INSTALL_DIR_PREFIX=".."
 fi
 
-cp "$TRACKME_SCRIPT" "${INSTALL_DIR_PREFIX}${INSTALL_DIR}/trackMe"
+sudo cp "$TRACKME_SCRIPT" "${INSTALL_DIR_PREFIX}${INSTALL_DIR}/trackMe"
