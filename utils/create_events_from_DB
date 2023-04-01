@@ -7,6 +7,14 @@
 source "./utils/constants"
 source "./utils/helpers"
 
+if [ ! -d "$CLIENTS" ];then
+  echo "No data dir, please clone DB."
+  exit 1
+fi
+
+echo "Removing old event files..."
+rm -fv event*
+
 FILES="$(find "$CLIENTS" -type f -not -path 'trackmedata/.git*' -not -path 'trackmedata/.raw_data*' | wc -l | cut -d' ' -f1)"
 FILE_COUNT=0
 echo "Creating intermediate event file."

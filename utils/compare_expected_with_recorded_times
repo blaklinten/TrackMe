@@ -16,7 +16,8 @@ dateFormatToSeconds()
 
 parseSpaces()
 {
-    echo "$@" | sed s/\ /\_/g
+  ARGS="$*"
+  echo "${ARGS// /_}"
 }
 
 show()
