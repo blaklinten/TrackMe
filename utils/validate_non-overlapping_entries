@@ -7,6 +7,11 @@
 source "./utils/constants"
 source "./utils/helpers"
 
+if [ ! -f "$EVENT_FILE" ];then
+  echo "No event file, run create_event_file_from_DB script?"
+  exit 1
+fi
+
 echo "Validating no overlapping entries..."
 TOTAL=0
 COUNT=0
