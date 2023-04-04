@@ -1,0 +1,13 @@
+#!/bin/bash
+
+pushd ~/ >/dev/null || exit
+
+if [ -f .TRACKME_GIT_SYNC ]; then
+  mv .TRACKME_GIT_SYNC .TRACKME_GIT_SYNC.NO
+  echo "Not syncing with Git"
+  return 0
+elif [ -f .TRACKME_GIT_SYNC.NO ]; then
+  mv .TRACKME_GIT_SYNC.NO .TRACKME_GIT_SYNC 
+  echo "Syncing with Git"
+  return 0
+fi
