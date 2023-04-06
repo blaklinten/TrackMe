@@ -49,16 +49,30 @@ gitPush()
   ACTION="$1"
 	ACTIVITY="$2"
 	PROJECT="$3"
+  DO_AMEND="$4"
 
 	pushd "$CLIENTS" &> /dev/null || exit
-	show "Git: Pushing $ACTION $ACTIVITY, $PROJECT..." &
-	git commit -am "$ACTION $ACTIVITY, $PROJECT" &> /dev/null
-	
-	if git push &> /dev/null; then
+
+  if [ -n "$DO_AMEND" ] && [ "$DO_AMEND" = "amend" ]; then
+    show "Git: Amending $ACTION $ACTIVITY, $PROJECT..." &
+    git commit --amend -m "$ACTION $ACTIVITY, $PROJECT" &> /dev/null
+
+    if git push --force &> /dev/null; then
         show "Git: Push succeeded!"
     else
         show "Git: Push failed..."
     fi
+  else
+    show "Git: Pushing $ACTION $ACTIVITY, $PROJECT..." &
+    git commit -am "$ACTION $ACTIVITY, $PROJECT" &> /dev/null
+
+    if git push &> /dev/null; then
+          show "Git: Push succeeded!"
+      else
+          show "Git: Push failed..."
+    fi
+  fi
+	
 	popd &> /dev/null || exit
 }
 
@@ -374,13 +388,11 @@ updateActiveState()
   ACTIVITY="$2"
   PROJECT="$3"
 
-  rm "$ACTIVE"
-
-  printf '%s\n%s\n%s\n%s\n' "$CLIENT" "$ACTIVITY" "$PROJECT" "$START" >> "$ACTIVE"
+  printf '%s\n%s\n%s\n%s\n' "$CLIENT" "$ACTIVITY" "$PROJECT" "$START" > "$ACTIVE"
 
   if [[ "$GITSYNC" == "yes" ]]; then
       gitAdd "active"
-      gitPush "Updated entry for" "$ACTIVITY" "$PROJECT"
+      gitPush "Active entry for" "$ACTIVITY" "$PROJECT" "amend"
   fi
 }
 
