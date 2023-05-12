@@ -78,12 +78,17 @@ gitPush()
 
 gitAdd()
 {
-    NEW_ACTIVITY="$1"
-
 	pushd "$CLIENTS" &> /dev/null || exit
-	git add "$NEW_ACTIVITY" &> /dev/null
+	git add "$1" &> /dev/null
 	popd &> /dev/null || exit
 
+}
+
+gitRemove()
+{
+	pushd "$CLIENTS" &> /dev/null || exit
+  git rm "$1"
+	popd &> /dev/null || exit
 }
 
 ########################
@@ -372,14 +377,64 @@ stopActivity()
 
   saveActivity "$START" "$END" "$ACTIVITY" "$PROJECT"
   createAndSaveStopEvent "$START" "$END" "$ACTIVITY" "$PROJECT"
-  rm "$ACTIVE"
-  git rm "$ACTIVE"
 
   if [[ "$GITSYNC" == "yes" ]]; then
-      gitPush "Stopped entry for" "$ACTIVITY" "$PROJECT"
+    gitRemove "$ACTIVE"
+    gitPush "Stopped entry for" "$ACTIVITY" "$PROJECT"
+  else
+    rm "$ACTIVE"
   fi
 
   show "Time entry added to $(parseUnderscores "$ACTIVITY")!"
+}
+
+switchActivity()
+{
+  RUNNING_PROJECT=$(sed -n 3p "$ACTIVE")
+	ANS="$(show "Choose new activity:" "new $(ls "$PROJECTS/$RUNNING_PROJECT") quit")"
+	case "$ANS" in
+    	"quit")
+        	show "Exiting..."
+        	pkill trackMe
+        	exit
+       ;;
+    	"new")
+        	ANS=$(show "Enter name of new activity:")
+       ;;
+	esac
+
+	local NEW_ACTIVITY
+  NEW_ACTIVITY=$(parseSpaces "$ANS")
+
+	if [[ "$NEW_ACTIVITY" == "" ]]; then
+    	show "You must enter a valid activity name."
+    	switchActivity 
+    	return
+	fi
+
+  RUNNING_START=$(sed -n 4p "$ACTIVE")
+  RUNNING_END=$(dateNow)
+  RUNNING_ACTIVITY=$(sed -n 2p "$ACTIVE")
+
+  saveActivity "$RUNNING_START" "$RUNNING_END" "$RUNNING_ACTIVITY" "$RUNNING_PROJECT"
+  createAndSaveStopEvent "$RUNNING_START" "$RUNNING_END" "$RUNNING_ACTIVITY" "$RUNNING_PROJECT"
+
+  if [[ "$GITSYNC" == "yes" ]]; then
+    gitRemove "$ACTIVE"
+  else
+    rm "$ACTIVE"
+  fi
+
+	START=$(dateNow)
+  printf '%s\n%s\n%s\n%s\n' "$CLIENT" "$NEW_ACTIVITY" "$PROJECT" "$START" >> "$ACTIVE"
+
+  if [[ "$GITSYNC" == "yes" ]]; then
+      gitAdd "active"
+      gitAdd "$CLIENT/$PROJECT/$NEW_ACTIVITY"
+      gitPush "Switched entry: $RUNNING_ACTIVITY -> " "$NEW_ACTIVITY" "$RUNNING_PROJECT"
+  fi
+
+	show "$(parseUnderscores "$NEW_ACTIVITY")@$(parseUnderscores "$PROJECT") started at $(dateSecondsToFormat "$START")"
 }
 
 updateActiveState()
@@ -718,7 +773,7 @@ main()
 	PROJECTS="$CLIENTS/$CLIENT"
 
 	while true; do
-		ANS="$(show "$CLIENT: What do you want to do?" "startNew stop restart edit status summarize gitPull gitPush help switch quit")"
+		ANS="$(show "$CLIENT: What do you want to do?" "start stop restart switch edit status summarize gitPull gitPush help change-client quit")"
 		CHOICE="$ANS"
     	case "$CHOICE" in
         "gitPull")
@@ -727,12 +782,15 @@ main()
         "gitPush")
           gitPush "Manually triggered" "$ACTIVITY"  "$PROJECT"
         ;;
-        "startNew")
+        "start")
           	if [[ -f "$ACTIVE" ]]; then
               	show "A timer is already running..."
           	else
               	chooseProject "startActivity"
           	fi
+        ;;
+        "switch")
+          switchActivity
         ;;
         "restart")
           	if [[ -f "$ACTIVE" ]]; then
@@ -764,7 +822,7 @@ main()
         "help")
           	show "TrackMe - A time tracking program" "Usage: trackme [option] Options: start        - start a timer stop         - stop a running timer, if one exists. status       - check status of running timer, if any. summarize    - summarize time for a specified project and/or activity "
         ;;
-        "switch")
+        "change-client")
           	main
           	exit
         ;;
