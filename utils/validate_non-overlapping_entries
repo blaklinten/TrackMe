@@ -1,8 +1,8 @@
 #!/bin/bash
 
-#######################################################################
-# Validate there is no overlapping evntries in temp sorted event file #
-#######################################################################
+###########################################################################
+# Validate that there is no overlapping entries in temp sorted event file #
+###########################################################################
 
 source "./utils/constants"
 source "./utils/helpers"
