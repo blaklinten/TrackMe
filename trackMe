@@ -13,12 +13,6 @@ export REPORTS="$CLIENTS/reports"
 export FINAL_REPORT="$REPORTS/final"
 export DATE_FILE_PATH="$CLIENTS/dates"
 
-if [ -f "$HOME/.TRACKME_GIT_SYNC" ]; then
-  export GITSYNC="yes"
-else
-  export GITSYNC="no"
-fi
-
 export DATE_FORMAT='-R'
 export DATE_SHORT_FORMAT='+%a %b %e %Y'
 
@@ -125,11 +119,18 @@ show()
 	INFO="$1"
 	CHOICES="$2"
 
-  if [ -n "$3" ] && [ "$3" = "vertical-list" ]; then
-    echo "$CHOICES" | sed -e 's/ /\n/g' | dmenu -l 20 -i -p "$INFO"
-  else
-    echo "$CHOICES" | sed -e 's/ /\n/g' | dmenu -i -p "$INFO"
-  fi
+  case "$TRACKME_INTERFACE" in
+    "dmenu")
+      if [ -n "$3" ] && [ "$3" = "vertical-list" ]; then
+        echo "$CHOICES" | sed -e 's/ /\n/g' | dmenu -l 20 -i -p "$INFO"
+      else
+        echo "$CHOICES" | sed -e 's/ /\n/g' | dmenu -i -p "$INFO"
+      fi
+    ;;
+    "fzf")
+      echo "$CHOICES" | sed -e 's/ /\n/g' | fzf --reverse --prompt="$INFO"
+    ;;
+  esac
 
 }
 
@@ -273,7 +274,7 @@ startActivity()
 {
 	PROJECT="$1"
 
-	if [[ "$GITSYNC" == "yes" ]]; then
+	if [[ "$TRACKME_GITSYNC" == "yes" ]]; then
             gitPull
 	fi
 
@@ -299,7 +300,7 @@ startActivity()
 	START=$(dateNow)
   printf '%s\n%s\n%s\n%s\n' "$CLIENT" "$ACTIVITY" "$PROJECT" "$START" >> "$ACTIVE"
 
-  if [[ "$GITSYNC" == "yes" ]]; then
+  if [[ "$TRACKME_GITSYNC" == "yes" ]]; then
       gitAdd "active"
       gitPush "Active entry for" "$ACTIVITY" "$PROJECT"
   fi
@@ -320,7 +321,7 @@ restartLatest()
 
   printf '%s\n%s\n%s\n%s\n' "$CLIENT" "$ACTIVITY" "$PROJECT" "$START" >> "$ACTIVE"
 
-  if [[ "$GITSYNC" == "yes" ]]; then
+  if [[ "$TRACKME_GITSYNC" == "yes" ]]; then
       gitAdd "active"
       gitPush "Active entry for" "$ACTIVITY" "$PROJECT"
   fi
@@ -358,7 +359,7 @@ saveActivity()
 
   printf '%s\n%s\n%s\n' "$STARTED" "$ENDED" "$DURATION" >> "$PROJECTS/$PROJECT/$ACTIVITY"
 
-  if [[ "$GITSYNC" == "yes" ]]; then
+  if [[ "$TRACKME_GITSYNC" == "yes" ]]; then
       gitAdd "$CLIENT/$PROJECT/$ACTIVITY"
   fi
 }
@@ -378,7 +379,7 @@ stopActivity()
   saveActivity "$START" "$END" "$ACTIVITY" "$PROJECT"
   createAndSaveStopEvent "$START" "$END" "$ACTIVITY" "$PROJECT"
 
-  if [[ "$GITSYNC" == "yes" ]]; then
+  if [[ "$TRACKME_GITSYNC" == "yes" ]]; then
     gitRemove "$ACTIVE"
     gitPush "Stopped entry for" "$ACTIVITY" "$PROJECT"
   else
@@ -419,7 +420,7 @@ switchActivity()
   saveActivity "$RUNNING_START" "$RUNNING_END" "$RUNNING_ACTIVITY" "$RUNNING_PROJECT"
   createAndSaveStopEvent "$RUNNING_START" "$RUNNING_END" "$RUNNING_ACTIVITY" "$RUNNING_PROJECT"
 
-  if [[ "$GITSYNC" == "yes" ]]; then
+  if [[ "$TRACKME_GITSYNC" == "yes" ]]; then
     gitRemove "$ACTIVE"
   else
     rm "$ACTIVE"
@@ -428,7 +429,7 @@ switchActivity()
 	START=$(dateNow)
   printf '%s\n%s\n%s\n%s\n' "$CLIENT" "$NEW_ACTIVITY" "$PROJECT" "$START" >> "$ACTIVE"
 
-  if [[ "$GITSYNC" == "yes" ]]; then
+  if [[ "$TRACKME_GITSYNC" == "yes" ]]; then
       gitAdd "active"
       gitAdd "$CLIENT/$PROJECT/$NEW_ACTIVITY"
       gitPush "Switched entry: $RUNNING_ACTIVITY -> " "$NEW_ACTIVITY" "$RUNNING_PROJECT"
@@ -445,7 +446,7 @@ updateActiveState()
 
   printf '%s\n%s\n%s\n%s\n' "$CLIENT" "$ACTIVITY" "$PROJECT" "$START" > "$ACTIVE"
 
-  if [[ "$GITSYNC" == "yes" ]]; then
+  if [[ "$TRACKME_GITSYNC" == "yes" ]]; then
       gitAdd "active"
       gitPush "Active entry for" "$ACTIVITY" "$PROJECT" "amend"
   fi
@@ -839,5 +840,10 @@ main()
 #############
 # Call main #
 #############
+
+if [ ! -v TRACKME_INTERFACE ];then
+  echo "You need to export the TRACKME_INTERFACE varible with either <fzf> or <dmenu>"
+  exit 1
+fi
 
 main
