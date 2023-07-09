@@ -128,7 +128,7 @@ show()
       fi
     ;;
     "fzf")
-      echo "$CHOICES" | sed -e 's/ /\n/g' | fzf --reverse --prompt="$INFO"
+      echo "$CHOICES" | sed -e 's/ /\n/g' | fzf --print-query --reverse --prompt="$INFO" | tail -n1
     ;;
   esac
 
