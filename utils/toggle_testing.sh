@@ -1,28 +1,25 @@
 #!/bin/bash
 
-GIT_SYNC_FLAG="$HOME/.TRACKME_GIT_SYNC"
 GIT_REPO="$HOME/.trackme"
 ACTIVE_TIMER="$HOME/.trackme/active"
 ON_OR_OFF="$1"
 
 git_sync_on()
 {
-  if [ -f "$GIT_SYNC_FLAG.OFF" ]; then
-    mv "$GIT_SYNC_FLAG.OFF" "$GIT_SYNC_FLAG"
+  if [ -z "$TRACKME_GITSYNC" ] || [ "$TRACKME_GITSYNC" = "no" ]; then
+    export TRACKME_GITSYNC="yes"
     echo "Git sync enabled ✓"
-  elif [ -f "$GIT_SYNC_FLAG" ]; then
+  elif [ -n "$TRACKME_GITSYNC" ] && [ "$TRACKME_GITSYNC" = "yes" ]; then
     echo "Git sync already on ✓"
-  else
-    echo "ERROR: No git sync file ✗"
   fi
 }
 
 git_sync_off()
 {
-  if [ -f "$GIT_SYNC_FLAG" ]; then
-    mv "$GIT_SYNC_FLAG" "$GIT_SYNC_FLAG.OFF"
+  if [ -n "$TRACKME_GITSYNC" ] && [ "$TRACKME_GITSYNC" = "yes" ]; then
+    unset TRACKME_GITSYNC
     echo "Git sync disabled ✓"
-  elif [ -f "$GIT_SYNC_FLAG.OFF" ];then
+  elif [ -z "$TRACKME_GITSYNC" ] || [ "$TRACKME_GITSYNC" = "no" ]; then
     echo "Git sync already off ✓"
   else
     echo "ERROR: No git sync file ✗"
@@ -57,6 +54,7 @@ reset_git_to_master()
   popd || echo "ERROR: Could not return from Git repo ✗"
 }
 
+echo "This script must be sourced in the current shell for changes to take effect!"
 case "$ON_OR_OFF" in
   "off")
     git_sync_on
