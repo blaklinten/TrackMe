@@ -1,6 +1,6 @@
 #!/bin/bash
 
-TEST_ACTIVITY="adding"
+TEST_ACTIVITY="testing git adding"
 
 echo "Calling gitAdd with TEST_ACTIVITY=\"$TEST_ACTIVITY\"..."
 

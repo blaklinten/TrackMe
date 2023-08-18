@@ -9,6 +9,7 @@ assert_no_space()
     if [ "$INPUT" = "$PROCESSED" ]; then
         return 0
     else
+        error_log "$INPUT != $PROCESSED - spaces not removed"
         return 1
     fi
 }
@@ -22,21 +23,28 @@ assert_no_underscore()
     if [ "$INPUT" = "$PROCESSED" ]; then
         return 0
     else
+        error_log "$INPUT != $PROCESSED - underscores not removed"
         return 1
     fi
 }
 
 assert_equals()
 {
-    [ -z "$1" ] && return 1
-    [ -z "$2" ] && return 1
+    if [ -z "$1" ];then
+      error_log "No first arg, check params!"
+      return 1
+    fi
+    if [ -z "$2" ];then
+      error_log "No second arg, check params!"
+      return 1
+    fi
 
     
     if [ "$1" = "$2" ]; then
         echo "$1 == $2"
         return 0
     else
-        echo "$1 != $2"
+        error_log "$1 != $2"
         return 1
     fi
 }
