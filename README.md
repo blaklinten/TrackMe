@@ -1,5 +1,5 @@
 # TrackMe
-A time tracker with both CLI and DMenu interfaces
+A time tracker with both CLI(fzf) and DMenu interfaces
 
  PLEASE READ ALL SOURCE CODE BEFORE USING.
 
@@ -7,6 +7,8 @@ A time tracker with both CLI and DMenu interfaces
 
 # Setup
 Weather you want to use Git or not, you must create "~/.trackme" where your data will live.
+To use git, `export TRACKME_GITSYNC=yes`.
+Also, `export TRACKME_INTERFACE=fzf|dmenu`
 
 # Testing
 There is a collection of tests in the `./test/tests`-folder.
