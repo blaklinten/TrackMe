@@ -31,11 +31,11 @@ git clone https://blaklinten@github.com/blaklinten/TrackMeData trackmedata
 
   - create_events_from_DB: Extract a normalized events-like file from the data to work with.
 
-Now we are ready to make changes either in the database or in the eventfile;
-  1. If changes are done in the database (./trackmedata), make sure to re-generate the event file after since the validation scripts work on the event file.
-  This is not recommended since it would take more time than editing the event file.
+Now we are ready to make changes either in the database or in the event file;
+  1. If changes are done in the database (./trackmedata), which could be easier w.r.t. time format, make sure to re-generate the event_file (by calling `create_events_from_DB`) after since the validation scripts work on the event file.
+  This would take more time than editing the event file.
 
-  2. Recommended way is to make changes to the event file -> validate changes -> create new db -> update remote with new, improved db.
+  2. Another way is to make changes directly to the event file; update event_file -> validate changes -> create new db -> update remote.
 
 - validate_duration: Make sure that expected duration ("Duration" field) matches calculated duration. This is to prevent manually added entries having erroneous duration.
 

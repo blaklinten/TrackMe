@@ -13,7 +13,7 @@ if [ ! -f "$EVENT_FILE" ];then
 fi
 
 echo "Validating duration..."
-LINES_TO_PROCESS="$(wc -l "${EVENT_FILE}-sorted" | cut -d' ' -f1)"
+LINES_TO_PROCESS="$(wc -l "$EVENT_FILE" | cut -d' ' -f1)"
 LINE_COUNT=0
 ERRORS=0
 while read -r line; do
@@ -33,6 +33,6 @@ while read -r line; do
     ((ERRORS += 1))
     echo "${ACTIVITY}@${PROJECT} by $CLIENT has invalid duration <$DURATION> - Should be $REAL_DURATION"
   fi
-done<"${EVENT_FILE}-sorted"
+done<"$EVENT_FILE"
 printf '\r\e[0K%s\n' "$LINE_COUNT lines processed out of $LINES_TO_PROCESS."
 echo "Validation done, $ERRORS errors were found."

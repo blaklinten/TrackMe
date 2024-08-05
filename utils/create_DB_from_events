@@ -12,7 +12,7 @@ if [ ! -f "$EVENT_FILE" ];then
   exit 1
 fi
 
-LINES_TO_PROCESS="$(wc -l "${EVENT_FILE}-sorted" | cut -d' ' -f1)"
+LINES_TO_PROCESS="$(wc -l "$EVENT_FILE" | cut -d' ' -f1)"
 LINE_COUNT=0
 DB="new-$CLIENTS"
 
@@ -45,5 +45,5 @@ while read -r line; do
     "Duration: $DURATION" \
     >> "$DB/$CLIENT/$PROJECT/$ACTIVITY"
 
-done<"${EVENT_FILE}-sorted"
+done<"$EVENT_FILE"
 printf '\r\e[0K%s\n' "$LINE_COUNT lines processed out of $LINES_TO_PROCESS."
