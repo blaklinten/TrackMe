@@ -364,6 +364,36 @@ saveActivity()
   fi
 }
 
+stopActivityAt()
+{
+  if [ ! -f "$ACTIVE" ]; then
+      show "No timer active, start one?"
+      return
+  fi
+
+  ANS=$(show "Enter new stop time: ")
+  if [ -z "$ANS" ]; then
+      show "No change..."
+      return
+  fi
+  END=$(dateFormatToSeconds "$ANS")
+  START=$(sed -n 4p "$ACTIVE")
+  ACTIVITY=$(sed -n 2p "$ACTIVE")
+  PROJECT=$(sed -n 3p "$ACTIVE")
+
+  saveActivity "$START" "$END" "$ACTIVITY" "$PROJECT"
+  createAndSaveStopEvent "$START" "$END" "$ACTIVITY" "$PROJECT"
+
+  if [[ "$TRACKME_GITSYNC" == "yes" ]]; then
+    gitRemove "$ACTIVE"
+    gitPush "Stopped entry for" "$ACTIVITY" "$PROJECT"
+  else
+    rm "$ACTIVE"
+  fi
+
+  show "Time entry added to $(parseUnderscores "$ACTIVITY")!"
+}
+
 stopActivity()
 {
   if [ ! -f "$ACTIVE" ]; then
@@ -774,7 +804,7 @@ main()
 	PROJECTS="$CLIENTS/$CLIENT"
 
 	while true; do
-		ANS="$(show "$CLIENT: What do you want to do?" "start stop restart switch edit status summarize gitPull gitPush help change-client quit")"
+		ANS="$(show "$CLIENT: What do you want to do?" "start stop stopAt restart switch edit status summarize gitPull gitPush help change-client quit")"
 		CHOICE="$ANS"
     	case "$CHOICE" in
         "gitPull")
@@ -813,6 +843,9 @@ main()
                       chooseProject "summarize"
                   ;;
               esac
+        ;;
+        "stopAt")
+          	stopActivityAt
         ;;
         "stop")
           	stopActivity
