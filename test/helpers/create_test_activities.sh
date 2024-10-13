@@ -8,11 +8,11 @@ export EVENT_FILE="$DB/events"
 TEST_CALCULATE_DIFF()
 {
   ((DIFF = $2 - $1))
-  ((SECONDS = DIFF % 60))
+  ((SEC = DIFF % 60))
   ((MINUTES = (DIFF % 3600) / 60))
   ((HOURS = DIFF / 3600))
 
-	echo "$HOURS:$MINUTES:$SECONDS"
+	echo "$HOURS:$MINUTES:$SEC"
 }
 
 createActivity()
