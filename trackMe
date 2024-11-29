@@ -278,7 +278,7 @@ startActivity()
             gitPull
 	fi
 
-	ANS="$(show "What are you doing?" "new quit $(ls "$PROJECTS/$PROJECT")")"
+	ANS="$(show "What are you doing?" "new quit $(ls "$PROJECTS/$PROJECT")" "vertical-list")"
 	case "$ANS" in
     	"quit")
         	show "Exiting..."
@@ -422,7 +422,7 @@ stopActivity()
 switchActivity()
 {
   RUNNING_PROJECT=$(sed -n 3p "$ACTIVE")
-	ANS="$(show "Choose new activity:" "new $(ls "$PROJECTS/$RUNNING_PROJECT") quit")"
+	ANS="$(show "Choose new activity:" "new $(ls "$PROJECTS/$RUNNING_PROJECT") quit" "vertical-list")"
 	case "$ANS" in
     	"quit")
         	show "Exiting..."
@@ -518,7 +518,7 @@ editRunning()
             fi
         ;;
         "Activity")
-            ANS=$(show "Enter new project name: " "$ACTIVITY $(ls "$PROJECTS/$PROJECT")")
+            ANS=$(show "Enter new project name: " "$ACTIVITY $(ls "$PROJECTS/$PROJECT")" "vertical-list")
             if [ -z "$ANS" ]; then
                 show "No change..."
                 return
