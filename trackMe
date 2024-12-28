@@ -171,7 +171,7 @@ parseUnderscores()
 
 chooseClient()
 {
-	ANS="$(show "Choose an existing client, create a new, summarize by time or quit:" "new restart summarize gitPull gitPush $(ls "$CLIENTS") quit")"
+	ANS="$(show "Choose an existing client, create a new, summarize by time or quit:" "new restart summarize gitPull gitPush $(ls "$CLIENTS") quit" "vertical-list")"
 	CHOICE="$(parseSpaces "$ANS")"
 
 	case "$CHOICE" in
@@ -219,7 +219,7 @@ chooseClient()
 chooseProject()
 {
 	SCRIPT="$1"
-	ANS="$(show "Choose an existing project, create a (n)ew or (q)uit" "$(ls "$PROJECTS")")"
+	ANS="$(show "Choose an existing project, create a (n)ew or (q)uit" "$(ls "$PROJECTS")" "vertical-list")"
 	CHOICE="$(parseSpaces "$ANS")"
 
 	case $CHOICE in
