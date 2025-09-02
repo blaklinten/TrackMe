@@ -10,3 +10,5 @@ export EVENT_FILE="$WD/event_file"
 export EVENT_FILE_INTERMEDIATE="$WD/event_file-intermediate"
 export FINAL_EVENT_FILE="$WD/events"
 export DATE_FORMAT='-R'
+export MAPPING_ENC="$CLIENTS/mapping.enc"
+export MAPPING_CLEAR="$CLIENTS/mapping"

@@ -12,6 +12,8 @@ export EVENT_FILE="$CLIENTS/events"
 export REPORTS="$CLIENTS/reports"
 export FINAL_REPORT="$REPORTS/final"
 export DATE_FILE_PATH="$CLIENTS/dates"
+export MAPPING_ENC="$CLIENTS/mapping.enc"
+export MAPPING_CLEAR="$CLIENTS/mapping"
 
 export DATE_FORMAT='-R'
 export DATE_SHORT_FORMAT='+%a %b %e %Y'
@@ -146,6 +148,10 @@ showStatus()
     START=$(sed -n 4p "$ACTIVE")
     END=$(dateNow)
 
+    if [[ "$CLIENT" == "$ENCRYPTED_CLIENT" ]]; then
+      ACTIVITY=$(decrypt_text "$ACTIVITY")
+    fi
+
     show "Timer running for $(parseUnderscores "$ACTIVITY") on $PROJECT Started at $(dateSecondsToFormat "$START"). Running for $(diff "$START" "$END")."
 }
 
@@ -163,6 +169,43 @@ parseUnderscores()
 {
   ARGS="$*"
   echo "${ARGS//_/ }"
+}
+
+decrypt_mapping()
+{
+  if [[ -z "$TRACKME_ENC_PASS" ]]; then
+      show "PANIC! Empty TRACKME_ENC_PASS, export it plz!"
+      exit
+  fi
+
+  openssl enc -d -aes-256-cbc -pbkdf2 -pass pass:"$TRACKME_ENC_PASS" -in "$MAPPING_ENC" -out "$MAPPING_CLEAR"
+}
+
+encrypt_text()
+{
+  decrypt_mapping
+
+  # Create a file with name same as text to have sha256sum create the mapping [hash <-> text]
+  echo "$1" > "$1"
+  HASH="$(sha256sum "$1")"
+  echo "$HASH" >> "$MAPPING_CLEAR"
+  openssl enc -aes-256-cbc -pbkdf2 -pass pass:"$TRACKME_ENC_PASS" -in "$MAPPING_CLEAR" -out "$MAPPING_ENC" 
+  shred -uz "$1" "$MAPPING_CLEAR"
+  cut -d' ' -f1 <<<"$HASH"
+}
+
+decrypt_text()
+{
+  decrypt_mapping
+  
+  while IFS= read -r line || [ -n "$line" ]; do
+    if [ "$(cut -d' ' -f1 <<<"$line")" = "$1" ]; then
+    cut -d' ' --complement -f1,2 <<<"$line";
+    break;
+    fi;
+  done < "$MAPPING_CLEAR"
+
+  shred -uz "$MAPPING_CLEAR"
 }
 
 ###############################
@@ -289,6 +332,7 @@ startActivity()
         	ANS=$(show "Enter name of new activity:")
        ;;
 	esac
+
 	ACTIVITY=$(parseSpaces "$ANS")
 
 	if [[ "$ACTIVITY" == "" ]]; then
@@ -297,12 +341,20 @@ startActivity()
     	return
 	fi
 
+  if [[ "$CLIENT" == "$ENCRYPTED_CLIENT" ]]; then
+    ACTIVITY=$(encrypt_text "$ACTIVITY")
+  fi
+
 	START=$(dateNow)
   printf '%s\n%s\n%s\n%s\n' "$CLIENT" "$ACTIVITY" "$PROJECT" "$START" >> "$ACTIVE"
 
   if [[ "$TRACKME_GITSYNC" == "yes" ]]; then
       gitAdd "active"
       gitPush "Active entry for" "$ACTIVITY" "$PROJECT"
+  fi
+
+  if [[ "$CLIENT" == "$ENCRYPTED_CLIENT" ]]; then
+    ACTIVITY=$(decrypt_text "$ACTIVITY")
   fi
 
 	show "$(parseUnderscores "$ACTIVITY")@$(parseUnderscores "$PROJECT") started at $(dateSecondsToFormat "$START")"
@@ -324,6 +376,10 @@ restartLatest()
   if [[ "$TRACKME_GITSYNC" == "yes" ]]; then
       gitAdd "active"
       gitPush "Active entry for" "$ACTIVITY" "$PROJECT"
+  fi
+
+  if [[ "$CLIENT" == "$ENCRYPTED_CLIENT" ]]; then
+    ACTIVITY=$(decrypt_text "$ACTIVITY")
   fi
 
 	show "$(parseUnderscores "$ACTIVITY")@$(parseUnderscores "$PROJECT") started at $(dateSecondsToFormat "$START")"
@@ -391,6 +447,10 @@ stopActivityAt()
     rm "$ACTIVE"
   fi
 
+  if [[ "$CLIENT" == "$ENCRYPTED_CLIENT" ]]; then
+    ACTIVITY=$(decrypt_text "$ACTIVITY")
+  fi
+
   show "Time entry added to $(parseUnderscores "$ACTIVITY")!"
 }
 
@@ -414,6 +474,10 @@ stopActivity()
     gitPush "Stopped entry for" "$ACTIVITY" "$PROJECT"
   else
     rm "$ACTIVE"
+  fi
+
+  if [[ "$CLIENT" == "$ENCRYPTED_CLIENT" ]]; then
+    ACTIVITY=$(decrypt_text "$ACTIVITY")
   fi
 
   show "Time entry added to $(parseUnderscores "$ACTIVITY")!"
@@ -443,6 +507,11 @@ switchActivity()
     	return
 	fi
 
+  if [[ "$CLIENT" == "$ENCRYPTED_CLIENT" ]]; then
+    NEW_ACTIVITY=$(encrypt_text "$NEW_ACTIVITY")
+  fi
+
+
   RUNNING_START=$(sed -n 4p "$ACTIVE")
   RUNNING_END=$(dateNow)
   RUNNING_ACTIVITY=$(sed -n 2p "$ACTIVE")
@@ -463,6 +532,10 @@ switchActivity()
       gitAdd "active"
       gitAdd "$CLIENT/$PROJECT/$NEW_ACTIVITY"
       gitPush "Switched entry: $RUNNING_ACTIVITY -> " "$NEW_ACTIVITY" "$RUNNING_PROJECT"
+  fi
+
+  if [[ "$CLIENT" == "$ENCRYPTED_CLIENT" ]]; then
+    NEW_ACTIVITY=$(decrypt_text "$NEW_ACTIVITY")
   fi
 
 	show "$(parseUnderscores "$NEW_ACTIVITY")@$(parseUnderscores "$PROJECT") started at $(dateSecondsToFormat "$START")"
@@ -524,6 +597,11 @@ editRunning()
                 return
             fi
             ACTIVITY=$(parseSpaces "$ANS")
+
+            if [[ "$CLIENT" == "$ENCRYPTED_CLIENT" ]]; then
+              ACTIVITY=$(encrypt_text "$ACTIVITY")
+            fi
+
         ;;
         *)
         show "No such alternative, try agian"
@@ -531,6 +609,10 @@ editRunning()
 	esac
 
     updateActiveState "$START" "$ACTIVITY" "$PROJECT"
+
+  if [[ "$CLIENT" == "$ENCRYPTED_CLIENT" ]]; then
+    ACTIVITY=$(decrypt_text "$ACTIVITY")
+  fi
 
 	show "$(parseUnderscores "$ACTIVITY")@$(parseUnderscores "$PROJECT") started at $(dateSecondsToFormat "$START")"
 }

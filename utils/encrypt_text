@@ -1,0 +1,59 @@
+#!/bin/bash
+
+#########################
+# Manually encrypt text #
+#########################
+
+source "./utils/constants"
+
+decrypt_mapping()
+{
+  if [[ -z "$TRACKME_ENC_PASS" ]]; then
+      show "PANIC! Empty TRACKME_ENC_PASS, export it plz!"
+      return
+  fi
+
+  openssl enc -d -aes-256-cbc -pbkdf2 -pass pass:"$TRACKME_ENC_PASS" -in "$MAPPING_ENC" -out "$MAPPING_CLEAR"
+}
+
+encrypt_text()
+{
+  decrypt_mapping
+
+  # Create a file with name same as text to have sha256sum create the mapping [hash <-> text]
+  echo "$1" > "$1"
+  HASH="$(sha256sum "$1")"
+  echo "$HASH" >> "$MAPPING_CLEAR"
+  openssl enc -aes-256-cbc -pbkdf2 -pass pass:"$TRACKME_ENC_PASS" -in "$MAPPING_CLEAR" -out "$MAPPING_ENC" 
+  shred -uz "$1" "$MAPPING_CLEAR"
+  cut -d' ' -f1 <<<"$HASH"
+}
+
+decrypt_text()
+{
+  decrypt_mapping
+  
+  while IFS= read -r line || [ -n "$line" ]; do
+    if [ "$(cut -d' ' -f1 <<<"$line")" = "$1" ]; then
+    cut -d' ' --complement -f1,2 <<<"$line";
+    break;
+    fi;
+  done < "$MAPPING_CLEAR"
+
+  shred -uz "$MAPPING_CLEAR"
+}
+
+case "$1" in
+  "e")
+    encrypt_text "$2"
+    ;;
+  d*)
+    decrypt_text "$2"
+    ;;
+  o*)
+    decrypt_mapping
+    ;;
+  *)
+    echo "Specify encrypt/decrypt and text or open"
+    return
+esac
