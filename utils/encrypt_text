@@ -29,6 +29,12 @@ encrypt_text()
   cut -d' ' -f1 <<<"$HASH"
 }
 
+close_mapping()
+{
+  openssl enc -aes-256-cbc -pbkdf2 -pass pass:"$TRACKME_ENC_PASS" -in "$MAPPING_CLEAR" -out "$MAPPING_ENC" 
+  shred -uz "$MAPPING_CLEAR"
+}
+
 decrypt_text()
 {
   decrypt_mapping
@@ -44,7 +50,7 @@ decrypt_text()
 }
 
 case "$1" in
-  "e")
+  e*)
     encrypt_text "$2"
     ;;
   d*)
@@ -53,7 +59,10 @@ case "$1" in
   o*)
     decrypt_mapping
     ;;
+  c*)
+    close_mapping
+    ;;
   *)
-    echo "Specify encrypt/decrypt and text or open"
-    return
+    echo "Specify encrypt/decrypt and text, open or close"
+    exit
 esac
