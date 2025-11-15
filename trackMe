@@ -208,6 +208,15 @@ decrypt_text()
   shred -uz "$MAPPING_CLEAR"
 }
 
+decrypt_list()
+{
+  declare CLEAR
+  for hash in $1; do
+    CLEAR+="$(decrypt_text "$hash") "
+  done 
+  echo "$CLEAR"
+}
+
 ###############################
 # Manage clients and projects #
 ###############################
@@ -321,7 +330,11 @@ startActivity()
             gitPull
 	fi
 
-	ANS="$(show "What are you doing?" "new quit $(ls "$PROJECTS/$PROJECT")" "vertical-list")"
+  if [[ "$CLIENT" == "$ENCRYPTED_CLIENT" ]]; then
+    ANS="$(show "What are you doing?" "new quit $(decrypt_list "$(ls "$PROJECTS/$PROJECT")")" "vertical-list")"
+  else
+    ANS="$(show "What are you doing?" "new quit $(ls "$PROJECTS/$PROJECT")" "vertical-list")"
+  fi
 	case "$ANS" in
     	"quit")
         	show "Exiting..."
@@ -486,7 +499,13 @@ stopActivity()
 switchActivity()
 {
   RUNNING_PROJECT=$(sed -n 3p "$ACTIVE")
-	ANS="$(show "Choose new activity:" "new $(ls "$PROJECTS/$RUNNING_PROJECT") quit" "vertical-list")"
+
+  if [[ "$CLIENT" == "$ENCRYPTED_CLIENT" ]]; then
+    ANS="$(show "Choose new activity:" "new $(decrypt_list "$(ls "$PROJECTS/$RUNNING_PROJECT")") quit" "vertical-list")"
+  else
+    ANS="$(show "Choose new activity:" "new $(ls "$PROJECTS/$RUNNING_PROJECT") quit" "vertical-list")"
+  fi
+
 	case "$ANS" in
     	"quit")
         	show "Exiting..."
@@ -591,7 +610,12 @@ editRunning()
             fi
         ;;
         "Activity")
-            ANS=$(show "Enter new project name: " "$ACTIVITY $(ls "$PROJECTS/$PROJECT")" "vertical-list")
+            if [[ "$CLIENT" == "$ENCRYPTED_CLIENT" ]]; then
+              ANS=$(show "Enter new project name: " "$(decrypt_text $ACTIVITY) $(decrypt_list "$(ls "$PROJECTS/$PROJECT")")" "vertical-list")
+            else
+              ANS=$(show "Enter new project name: " "$ACTIVITY $(ls "$PROJECTS/$PROJECT")" "vertical-list")
+            fi
+
             if [ -z "$ANS" ]; then
                 show "No change..."
                 return
@@ -814,7 +838,11 @@ summarize()
 	local MINUTES=0
 	local SEC=0
 
-	ANS="$(show "Choose one activity, (a)ll activities or time or (q)uit" "$(ls "$PROJECTS/$PROJECT")")"
+  if [[ "$CLIENT" == "$ENCRYPTED_CLIENT" ]]; then
+    ANS="$(show "Choose one activity, (a)ll activities or time or (q)uit" "$(decrypt_list "$(ls "$PROJECTS/$PROJECT")")")"
+  else
+    ANS="$(show "Choose one activity, (a)ll activities or time or (q)uit" "$(ls "$PROJECTS/$PROJECT")")"
+  fi
 	CHOICE="$(parseSpaces "$ANS")"
 
 	case "$CHOICE" in 
@@ -827,14 +855,27 @@ summarize()
     	;;
     	*)
         	pushd "$PROJECTS/$PROJECT" > /dev/null || exit
-        	for ACTIVITY in *; do
-            	if [[ "$CHOICE" == "$ACTIVITY" ]]; then
-                	sumActivity "$PROJECTS/$PROJECT/$CHOICE"
-	                show "Total time = $HOURS:$MINUTES:$SEC"
-                	popd > /dev/null || exit
-                	return
-            	fi
-        	done
+
+          if [[ "$CLIENT" == "$ENCRYPTED_CLIENT" ]]; then
+            for ACTIVITY in $(decrypt_list "*"); do
+                if [[ "$CHOICE" == "$ACTIVITY" ]]; then
+                    sumActivity "$PROJECTS/$PROJECT/$CHOICE"
+                    show "Total time = $HOURS:$MINUTES:$SEC"
+                    popd > /dev/null || exit
+                    return
+                fi
+            done
+          else
+            for ACTIVITY in *; do
+                if [[ "$CHOICE" == "$ACTIVITY" ]]; then
+                    sumActivity "$PROJECTS/$PROJECT/$CHOICE"
+                    show "Total time = $HOURS:$MINUTES:$SEC"
+                    popd > /dev/null || exit
+                    return
+                fi
+            done
+          fi
+
         	show "Activity \"$CHOICE\" does not exist, try again or exit (q)."
         	summarize "$PROJECT"
         	;;
