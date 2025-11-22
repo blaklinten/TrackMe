@@ -148,7 +148,7 @@ showStatus()
     START=$(sed -n 4p "$ACTIVE")
     END=$(dateNow)
 
-    if [[ "$CLIENT" == "$ENCRYPTED_CLIENT" ]]; then
+    if [[ "$CLIENT" == "$TRACKME_ENCRYPTED_CLIENT" ]]; then
       ACTIVITY=$(decrypt_text "$ACTIVITY")
     fi
 
@@ -330,7 +330,7 @@ startActivity()
             gitPull
 	fi
 
-  if [[ "$CLIENT" == "$ENCRYPTED_CLIENT" ]]; then
+  if [[ "$CLIENT" == "$TRACKME_ENCRYPTED_CLIENT" ]]; then
     ANS="$(show "What are you doing?" "new quit $(decrypt_list "$(ls "$PROJECTS/$PROJECT")")" "vertical-list")"
   else
     ANS="$(show "What are you doing?" "new quit $(ls "$PROJECTS/$PROJECT")" "vertical-list")"
@@ -354,7 +354,7 @@ startActivity()
     	return
 	fi
 
-  if [[ "$CLIENT" == "$ENCRYPTED_CLIENT" ]]; then
+  if [[ "$CLIENT" == "$TRACKME_ENCRYPTED_CLIENT" ]]; then
     ACTIVITY=$(encrypt_text "$ACTIVITY")
   fi
 
@@ -366,7 +366,7 @@ startActivity()
       gitPush "Active entry for" "$ACTIVITY" "$PROJECT"
   fi
 
-  if [[ "$CLIENT" == "$ENCRYPTED_CLIENT" ]]; then
+  if [[ "$CLIENT" == "$TRACKME_ENCRYPTED_CLIENT" ]]; then
     ACTIVITY=$(decrypt_text "$ACTIVITY")
   fi
 
@@ -391,7 +391,7 @@ restartLatest()
       gitPush "Active entry for" "$ACTIVITY" "$PROJECT"
   fi
 
-  if [[ "$CLIENT" == "$ENCRYPTED_CLIENT" ]]; then
+  if [[ "$CLIENT" == "$TRACKME_ENCRYPTED_CLIENT" ]]; then
     ACTIVITY=$(decrypt_text "$ACTIVITY")
   fi
 
@@ -460,7 +460,7 @@ stopActivityAt()
     rm "$ACTIVE"
   fi
 
-  if [[ "$CLIENT" == "$ENCRYPTED_CLIENT" ]]; then
+  if [[ "$CLIENT" == "$TRACKME_ENCRYPTED_CLIENT" ]]; then
     ACTIVITY=$(decrypt_text "$ACTIVITY")
   fi
 
@@ -489,7 +489,7 @@ stopActivity()
     rm "$ACTIVE"
   fi
 
-  if [[ "$CLIENT" == "$ENCRYPTED_CLIENT" ]]; then
+  if [[ "$CLIENT" == "$TRACKME_ENCRYPTED_CLIENT" ]]; then
     ACTIVITY=$(decrypt_text "$ACTIVITY")
   fi
 
@@ -500,7 +500,7 @@ switchActivity()
 {
   RUNNING_PROJECT=$(sed -n 3p "$ACTIVE")
 
-  if [[ "$CLIENT" == "$ENCRYPTED_CLIENT" ]]; then
+  if [[ "$CLIENT" == "$TRACKME_ENCRYPTED_CLIENT" ]]; then
     ANS="$(show "Choose new activity:" "new $(decrypt_list "$(ls "$PROJECTS/$RUNNING_PROJECT")") quit" "vertical-list")"
   else
     ANS="$(show "Choose new activity:" "new $(ls "$PROJECTS/$RUNNING_PROJECT") quit" "vertical-list")"
@@ -526,7 +526,7 @@ switchActivity()
     	return
 	fi
 
-  if [[ "$CLIENT" == "$ENCRYPTED_CLIENT" ]]; then
+  if [[ "$CLIENT" == "$TRACKME_ENCRYPTED_CLIENT" ]]; then
     NEW_ACTIVITY=$(encrypt_text "$NEW_ACTIVITY")
   fi
 
@@ -553,7 +553,7 @@ switchActivity()
       gitPush "Switched entry: $RUNNING_ACTIVITY -> " "$NEW_ACTIVITY" "$RUNNING_PROJECT"
   fi
 
-  if [[ "$CLIENT" == "$ENCRYPTED_CLIENT" ]]; then
+  if [[ "$CLIENT" == "$TRACKME_ENCRYPTED_CLIENT" ]]; then
     NEW_ACTIVITY=$(decrypt_text "$NEW_ACTIVITY")
   fi
 
@@ -610,7 +610,7 @@ editRunning()
             fi
         ;;
         "Activity")
-            if [[ "$CLIENT" == "$ENCRYPTED_CLIENT" ]]; then
+            if [[ "$CLIENT" == "$TRACKME_ENCRYPTED_CLIENT" ]]; then
               ANS=$(show "Enter new project name: " "$(decrypt_text $ACTIVITY) $(decrypt_list "$(ls "$PROJECTS/$PROJECT")")" "vertical-list")
             else
               ANS=$(show "Enter new project name: " "$ACTIVITY $(ls "$PROJECTS/$PROJECT")" "vertical-list")
@@ -622,7 +622,7 @@ editRunning()
             fi
             ACTIVITY=$(parseSpaces "$ANS")
 
-            if [[ "$CLIENT" == "$ENCRYPTED_CLIENT" ]]; then
+            if [[ "$CLIENT" == "$TRACKME_ENCRYPTED_CLIENT" ]]; then
               ACTIVITY=$(encrypt_text "$ACTIVITY")
             fi
 
@@ -634,7 +634,7 @@ editRunning()
 
     updateActiveState "$START" "$ACTIVITY" "$PROJECT"
 
-  if [[ "$CLIENT" == "$ENCRYPTED_CLIENT" ]]; then
+  if [[ "$CLIENT" == "$TRACKME_ENCRYPTED_CLIENT" ]]; then
     ACTIVITY=$(decrypt_text "$ACTIVITY")
   fi
 
@@ -838,7 +838,7 @@ summarize()
 	local MINUTES=0
 	local SEC=0
 
-  if [[ "$CLIENT" == "$ENCRYPTED_CLIENT" ]]; then
+  if [[ "$CLIENT" == "$TRACKME_ENCRYPTED_CLIENT" ]]; then
     ANS="$(show "Choose one activity, (a)ll activities or time or (q)uit" "$(decrypt_list "$(ls "$PROJECTS/$PROJECT")")")"
   else
     ANS="$(show "Choose one activity, (a)ll activities or time or (q)uit" "$(ls "$PROJECTS/$PROJECT")")"
@@ -856,7 +856,7 @@ summarize()
     	*)
         	pushd "$PROJECTS/$PROJECT" > /dev/null || exit
 
-          if [[ "$CLIENT" == "$ENCRYPTED_CLIENT" ]]; then
+          if [[ "$CLIENT" == "$TRACKME_ENCRYPTED_CLIENT" ]]; then
             for ACTIVITY in $(decrypt_list "*"); do
                 if [[ "$CHOICE" == "$ACTIVITY" ]]; then
                     sumActivity "$PROJECTS/$PROJECT/$CHOICE"
