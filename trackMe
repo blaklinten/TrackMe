@@ -184,13 +184,15 @@ decrypt_mapping()
 encrypt_text()
 {
   decrypt_mapping
+  MAPPING_TMP=mapping_tmp
 
   # Create a file with name same as text to have sha256sum create the mapping [hash <-> text]
   echo "$1" > "$1"
   HASH="$(sha256sum "$1")"
   echo "$HASH" >> "$MAPPING_CLEAR"
-  openssl enc -aes-256-cbc -pbkdf2 -pass pass:"$TRACKME_ENC_PASS" -in "$MAPPING_CLEAR" -out "$MAPPING_ENC" 
-  shred -uz "$1" "$MAPPING_CLEAR"
+  sort "$MAPPING_CLEAR" | uniq > $MAPPING_TMP
+  openssl enc -aes-256-cbc -pbkdf2 -pass pass:"$TRACKME_ENC_PASS" -in "$MAPPING_TMP" -out "$MAPPING_ENC"
+  shred -uz "$1" "$MAPPING_CLEAR" "$MAPPING_TMP"
   cut -d' ' -f1 <<<"$HASH"
 }
 
